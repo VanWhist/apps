@@ -5,6 +5,9 @@ on:
     branches:
       - claude/lastlift-github-pages-deploy-q8ywd8
 
+permissions:
+  contents: write
+
 jobs:
   fetch:
     runs-on: ubuntu-latest
@@ -27,7 +30,6 @@ jobs:
           BASE="https://github.com/godotengine/godot-builds/releases/download/$TAG"
           curl -fsSL -o editor.zip "$BASE/Godot_v${TAG}_linux.x86_64.zip"
           curl -fsSL -o templates.tpz "$BASE/Godot_v${TAG}_export_templates.tpz"
-          ls -la editor.zip templates.tpz
 
       - name: Extract editor + web templates only
         run: |
@@ -41,13 +43,30 @@ jobs:
           cp tpz/templates/web* out/templates/
           cp tpz/templates/version.txt out/templates/
           echo "$TAG" > out/tag.txt
-          ./out/godot --headless --version || true
+          ./out/godot --headless --version
+          echo "--- template version.txt ---"; cat out/templates/version.txt
           ls -la out out/templates
-          du -sh out
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: godot-web-toolchain
-          path: out
-          retention-days: 1
-          compression-level: 0
+      - name: Pack into git-transferable chunks
+        run: |
+          set -euo pipefail
+          mkdir -p carrier
+          tar -C out -cf - . | xz -T0 -2 -c > toolchain.tar.xz
+          ls -la toolchain.tar.xz
+          split -b 80M -d -a 2 toolchain.tar.xz carrier/toolchain.tar.xz.part
+          sha256sum toolchain.tar.xz > carrier/SHA256SUMS
+          ls -la carrier
+
+      - name: Publish toolchain on a temporary branch
+        run: |
+          set -euo pipefail
+          cd carrier
+          git init -q -b claude/godot-toolchain-tmp .
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Godot ${{ steps.ver.outputs.tag }} toolchain (temporary; delete after use)"
+          git push -q --force \
+            "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" \
+            claude/godot-toolchain-tmp
+          echo "pushed"
