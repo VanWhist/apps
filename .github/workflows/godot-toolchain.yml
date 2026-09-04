@@ -1,0 +1,53 @@
+name: Fetch Godot toolchain
+
+on:
+  push:
+    branches:
+      - claude/lastlift-github-pages-deploy-q8ywd8
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve Godot 4.7 stable tag
+        id: ver
+        run: |
+          set -euo pipefail
+          curl -sSL -H "Authorization: Bearer ${{ github.token }}" \
+            "https://api.github.com/repos/godotengine/godot-builds/releases?per_page=100" > rel.json
+          TAG=$(jq -r '.[] | select(.prerelease==false) | .tag_name' rel.json \
+                | grep -E '^4\.7(\.[0-9]+)?-stable$' | head -1)
+          echo "Resolved: $TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Download editor and export templates
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.ver.outputs.tag }}"
+          BASE="https://github.com/godotengine/godot-builds/releases/download/$TAG"
+          curl -fsSL -o editor.zip "$BASE/Godot_v${TAG}_linux.x86_64.zip"
+          curl -fsSL -o templates.tpz "$BASE/Godot_v${TAG}_export_templates.tpz"
+          ls -la editor.zip templates.tpz
+
+      - name: Extract editor + web templates only
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.ver.outputs.tag }}"
+          mkdir -p out/templates
+          unzip -o -q editor.zip -d editor
+          find editor -maxdepth 2 -type f -name 'Godot_v*_linux.x86_64' -exec cp {} out/godot \;
+          chmod +x out/godot
+          unzip -o -q templates.tpz 'templates/web*' 'templates/version.txt' -d tpz
+          cp tpz/templates/web* out/templates/
+          cp tpz/templates/version.txt out/templates/
+          echo "$TAG" > out/tag.txt
+          ./out/godot --headless --version || true
+          ls -la out out/templates
+          du -sh out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: godot-web-toolchain
+          path: out
+          retention-days: 1
+          compression-level: 0
