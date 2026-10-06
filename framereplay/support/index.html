@@ -16,6 +16,7 @@
     body { color: #e5e5e7; background: #111; }
     hr { border-color: #333; }
     .note { background: #1a1a1c; }
+    .guide { border-color: #3a3a3c; }
   }
   h1 { font-size: 26px; margin: 0 0 4px; }
   h2 { font-size: 18px; margin: 36px 0 8px; }
@@ -26,12 +27,20 @@
   li { margin: 6px 0; }
   .note { background: #f5f5f7; border-radius: 10px; padding: 14px 18px; margin: 20px 0; }
   a { color: inherit; }
+  .guide { border: 1px solid #d1d1d6; border-radius: 10px; padding: 14px 18px; margin: 20px 0; }
+  .guide a { font-weight: 600; }
 </style>
 </head>
 <body>
 
 <h1>FrameReplay — Support</h1>
-<p class="sub">Last updated: 31 August 2026</p>
+<p class="sub">Last updated: 6 October 2026</p>
+
+<div class="guide">
+<strong>Recording with several devices?</strong>
+<a href="https://mogul-mic.com/en/frame-replay-multicam.html">Read the MultiCam guide</a> —
+how to set up the devices, record, and watch the videos side by side.
+</div>
 
 <div class="note">
 <strong>Contact:</strong> <a href="mailto:freestylemogulapps@gmail.com">freestylemogulapps@gmail.com</a><br>
@@ -41,13 +50,13 @@ Please write in English or Japanese. Include your iPhone model and iOS version.
 <h2>What the app does</h2>
 <p>FrameReplay is a movement analysis tool for coaches and trainers. You record,
 review the clip immediately, compare it against an earlier one, and record again.
-It works entirely on your device.</p>
+It works on your own devices; nothing is sent to us.</p>
 
 <h2>Requirements</h2>
 <ul>
   <li>iPhone, iOS 17.0 or later</li>
   <li>Designed for iPhone. It runs on iPad in compatibility mode.</li>
-  <li>No account, no sign-in, no internet connection needed</li>
+  <li>No account and no sign-in. The only connection the app makes to the internet is to Apple, for in-app purchases.</li>
 </ul>
 
 <h2>Frequently asked questions</h2>
@@ -70,14 +79,27 @@ Photos app are untouched, so check there first.</p>
 
 <h3>Which permissions does the app ask for, and why?</h3>
 <ul>
-  <li><strong>Camera and microphone</strong> — to record video. Nothing else.</li>
+  <li><strong>Camera and microphone</strong> — required to record video, and to record your
+      voice when you explain a clip ("Record with your voice and send"). Used only for that.</li>
+  <li><strong>Local network</strong> — requested only if you turn on MultiCam or receiving from
+      an SD card. Used solely to find and connect to your FrameReplay devices in the same
+      MultiCam group, or to reach the card, on your own Wi-Fi. It is not used to contact
+      anything else.</li>
   <li><strong>Photos (add only)</strong> — asked only if you turn on saving to Photos.
       The app cannot read your photo library.</li>
 </ul>
 
 <h3>Why is there no login?</h3>
-<p>The app has no networking code, so there is nothing to log in to. Your videos
-never leave the device unless you share them yourself.</p>
+<p>There is no account and no server belonging to us, so there is nothing to sign in to.
+The only connection the app makes to the internet is to Apple, for in-app purchases.
+MultiCam and receiving from an SD card talk only to devices on your own local Wi-Fi.
+Your videos leave your device only when you share them yourself, or when you send them
+to your own devices with MultiCam.</p>
+
+<h3>What are FrameReplay Pro and MultiCam?</h3>
+<p>FrameReplay Pro, and MultiCam as an add-on to Pro, are one-time in-app purchases.
+There is no subscription. Purchases are handled by Apple, and we never see your payment
+information. No purchase is required: recording and frame-by-frame review stay free.</p>
 
 <h3>The app got hot, or the battery drained quickly.</h3>
 <p>Recording at high frame rates and high resolution is demanding. Try 1080p at
@@ -93,7 +115,13 @@ detail is usually enough to find the cause.</p>
 <hr>
 
 <h1>FrameReplay サポート</h1>
-<p class="sub">最終更新日: 2026年8月31日</p>
+<p class="sub">最終更新日: 2026年10月6日</p>
+
+<div class="guide">
+<strong>何台かの端末で撮るときは</strong>
+<a href="https://mogul-mic.com/frame-replay-multicam.html">MultiCam の使い方ガイド</a>をご覧ください。
+端末の準備から、撮り方、並べて見る方法までまとめています。
+</div>
 
 <div class="note">
 <strong>お問い合わせ:</strong> <a href="mailto:freestylemogulapps@gmail.com">freestylemogulapps@gmail.com</a><br>
@@ -103,13 +131,13 @@ detail is usually enough to find the cause.</p>
 <h2>このアプリについて</h2>
 <p>FrameReplay は、コーチやトレーナーのための動作分析アプリです。
 撮って、その場で確認して、前回と並べて比べて、また撮る。
-すべて端末の中だけで完結します。</p>
+すべてお手元の端末の中で完結し、当方に何かが送られることはありません。</p>
 
 <h2>動作環境</h2>
 <ul>
   <li>iPhone、iOS 17.0 以降</li>
   <li>iPhone 用に作られています。iPad では互換モードで動作します。</li>
-  <li>アカウント登録、サインイン、インターネット接続のいずれも不要です</li>
+  <li>アカウント登録・サインインは不要です。アプリがインターネットにつながるのは、App内課金のために Apple と通信するときだけです。</li>
 </ul>
 
 <h2>よくある質問</h2>
@@ -133,14 +161,25 @@ detail is usually enough to find the cause.</p>
 
 <h3>どの権限を、何のために使いますか</h3>
 <ul>
-  <li><strong>カメラ・マイク</strong> — 動画を撮影するためです。それ以外には使いません。</li>
+  <li><strong>カメラ・マイク</strong> — 動画を撮影するため、また、動画に説明の声を入れるため
+      （「説明を録って送る」）に使います。それ以外の用途には使いません。</li>
+  <li><strong>ローカルネットワーク</strong> — MultiCam か、SDカードから受け取る機能を使うときだけ求められます。
+      お手元のWi-Fiの中で、同じ MultiCam グループの FrameReplay の端末を見つけてつなぐため、
+      またはカードへ接続するためだけに使います。それ以外の機器に接続することはありません。</li>
   <li><strong>写真（追加のみ）</strong> — 写真アプリへの保存をONにしたときだけ求められます。
       アプリが写真ライブラリを読み取ることはできません。</li>
 </ul>
 
 <h3>なぜログインがないのですか</h3>
-<p>アプリが通信のコードを持たないため、ログインする先がありません。
-撮った動画は、ご自身で共有しない限り端末から出ません。</p>
+<p>アカウント登録はなく、当方のサーバーもないため、ログインする先がありません。
+アプリがインターネットにつながるのは、App内課金のために Apple と通信するときだけです。
+MultiCam と、SDカードから受け取る機能は、お手元のWi-Fiの中の機器とだけ通信します。
+撮った動画が端末の外へ出るのは、ご自身で共有したときと、MultiCam でご自身の端末へ送るときだけです。</p>
+
+<h3>FrameReplay Pro と MultiCam とは</h3>
+<p>FrameReplay Pro と、Pro に追加する MultiCam は、買い切りのApp内課金です。
+月々の支払いはありません。購入の手続きは Apple が行い、当方が支払い情報を受け取ることはありません。
+購入しなくてもお使いいただけます。撮影とコマ送りでの確認は無料のままです。</p>
 
 <h3>本体が熱くなる／電池の減りが早い</h3>
 <p>高いフレームレートと高解像度での撮影は負荷がかかります。
