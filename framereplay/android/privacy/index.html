@@ -30,117 +30,261 @@
 <body>
 
 <h1>FrameReplay for Android — Privacy Policy</h1>
-<p class="sub">Last updated: 5 September 2026 · <a href="../../privacy/">iPhone version</a></p>
+<p class="sub">Last updated: 8 November 2026 · <a href="../../privacy/">iPhone version</a></p>
 
-<p><strong>FrameReplay does not collect any data.</strong> There is no account, no
-sign-up, and no server belonging to us. The app never connects to the internet:
-it has no address to send anything to.</p>
+<p><strong>FrameReplay does not send any data to us.</strong> There is no account, no
+sign-up, and no server belonging to us. The app has no internet address to send anything to.
+The only connection it can make is MultiCam, which is off unless you turn it on, and which
+talks only to devices on the same local network, Wi-Fi or wired (see below). Anything you
+choose to send us yourself, such as an email or a diagnostic log, and crash reports Google Play
+may pass on to us, are covered below.</p>
+
+<h2>Who we are</h2>
+<p>FrameReplay for Android is provided by FreestyleMogulApps.</p>
 
 <h2>What the app stores</h2>
 <ul>
-  <li>Videos you record are written to the app's own private storage on your device.</li>
-  <li>Your settings (control size) are stored on your device.</li>
-  <li>Nothing is uploaded, backed up to us, or shared with anyone.</li>
+  <li>Videos you record or import are written to the app's own storage on your device.</li>
+  <li>Recent footage in Replay and Continuous mode is kept in temporary files and overwritten as you go.</li>
+  <li>Your settings, the athlete names you enter, which athlete each video belongs to, the lines
+      and captions you draw, and your favorites are stored on your device.</li>
+  <li>Nothing is uploaded or backed up to us. The app opts out of Android's cloud backup. When you
+      move to a new phone, Android's device-to-device transfer may still copy the app's data to it.</li>
 </ul>
 
 <h2>Saving and sharing</h2>
 <ul>
-  <li><strong>Save to Gallery</strong> copies a video you choose into your device's
-      Movies folder (Movies/FrameReplay) so it appears in your gallery app. The copy is yours;
-      the app does not read your gallery.</li>
-  <li><strong>Share</strong> hands a video you choose to the Android share sheet. Where it goes
-      from there (a messaging app, cloud storage, another device) is entirely your choice, and
-      is governed by that app's privacy policy, not ours.</li>
-  <li>Both actions happen only when you tap them. The app never does either on its own.</li>
+  <li><strong>Save to Gallery</strong> copies a video you choose into your device's Movies folder
+      (Movies/FrameReplay) so it appears in your gallery app. This includes comparison and
+      slow-motion videos you save. The copy is yours; the app does not read your gallery.</li>
+  <li><strong>Share</strong> hands a video you choose to the Android share sheet. This includes the
+      explanation videos you record. Where it goes from there (a messaging app, cloud storage,
+      another device) is entirely your choice, and is governed by that app's privacy policy, not ours.</li>
+  <li>These actions happen only when you choose them, with two notes. If you turn on "Save after
+      recording" in Settings (off by default), each new video is also saved to the Gallery. And when
+      you stop an explanation recording, or leave that screen or the app while recording one, the
+      share sheet opens so you can choose where to send it; nothing is sent until you choose.</li>
+  <li><strong>Athlete names in file names:</strong> when you save or share a video that has an
+      athlete on it, the file name includes that athlete's name (on by default), and the name leaves
+      your device with the file. This also applies to videos saved by "Save after recording". You
+      can turn this off in the athlete list.</li>
+</ul>
+
+<h2>Importing videos</h2>
+<p>When you import, you choose videos in Android's photo picker. The app copies only the ones you
+choose into its own storage. It does not get access to your other photos or videos.</p>
+
+<h2>MultiCam</h2>
+<p>MultiCam is off by default. If you set this device to "Be a camera":</p>
+<ul>
+  <li>It looks for viewing devices (an iPhone or iPad running FrameReplay) on the same network, and
+      connects to those with the same group name. The group name is empty until you set one, and an
+      empty name also matches viewing devices that have no group name. Anyone on that network using
+      the same group name can start recording on this device and receive what it sends, so choose a
+      group name of your own.</li>
+  <li>It records when a viewing device signals it to, and sends that video to the device that
+      signaled. Videos you start yourself while it is a camera are sent to every connected viewing
+      device. If none is connected yet, the video waits while the app stays open and is sent to the
+      first viewing device in the same group that connects.</li>
+  <li>If you turn off keeping sent videos (on by default), a video may be removed from this device
+      once it has been sent. Your favorites, reference videos, and the video that is the newest one
+      on this device when sending finishes are kept.</li>
+  <li>It also sends: the video's file name, frame rate and recording time; the name you gave this
+      device (or its model name); a random ID the app creates for this device; and every 2 seconds
+      its temperature state, free space, battery level, charging state and frame rate.</li>
+  <li>It does not send athlete names, lines or captions.</li>
+  <li>It uses Wi-Fi or a wired network only, never mobile data, and nothing goes through us.</li>
+  <li><strong>This connection is not encrypted.</strong> Use a network you trust.</li>
+  <li>Videos on the viewing device stay there until they are deleted on that device.</li>
 </ul>
 
 <h2>Permissions</h2>
 <ul>
   <li><strong>Camera</strong> — required to record video. Used only for that.</li>
-  <li>The app does not record audio and does not request the microphone.</li>
+  <li><strong>Microphone</strong> — asked for the first time you record an explanation video. Your
+      voice goes into that video only. Ordinary recordings have no sound, and the app does not
+      listen in the background.</li>
+  <li><strong>Internet and network state</strong> — used only for MultiCam, as described above.
+      Android grants these without asking.</li>
   <li>The app does not request location, contacts, or access to your photos or files.</li>
 </ul>
 
 <h2>Diagnostic log</h2>
-<p>The app keeps a short log of what it did (for example, "recording started", "frame rate 240").
-It contains no video, no names, and no personal information. It stays on your device unless
-you choose to share it with us from Settings to help track down a problem.</p>
+<p>The app keeps a short log of what it did (for example, "recording started", "frame rate 240"),
+including error messages and crash details. It contains the app version, video file names (which
+show the date and time), and, if you use MultiCam, the group name, the name of this device (or its
+model name if you did not name it) and the names of the devices it connects to. It contains no
+video. Athlete names are not written to it, except that if saving a slow-motion video fails, that
+file's name, which can include the athlete's name, is recorded. It stays on your device unless you
+choose to share it from Settings to help track down a problem. If you share it with us, we use it
+only to investigate that problem and delete it once the problem is resolved, at the latest 90 days
+after we receive it.</p>
+
+<h2>Device survey</h2>
+<p>Settings also offers a device survey. It lists your device's manufacturer, model, device code
+name, Android version, and camera and video-encoder capabilities. It is created only when you ask
+for it and stays on your device unless you share it. If you share it with us, we handle it like a
+diagnostic log.</p>
 
 <h2>No tracking, no analytics, no advertising</h2>
-<p>There is no analytics SDK, no crash reporter, no advertising identifier, and no
-third-party code of any kind. No profile of you is built, and no data is shared
-with or sold to anyone.</p>
+<p>There is no analytics SDK, no advertising identifier, and nothing in the app that sends crash
+reports to us. The app is built with standard libraries from Google (AndroidX, Guava) and JetBrains
+(Kotlin), used to run the app itself. No profile of you is built, and no data is shared with or
+sold to anyone by us.</p>
+<p>If you allow your device to share usage and diagnostics with Google, Google Play may send us
+crash reports for the app (for example, the device model, Android version and where the crash
+happened). We use them only to fix problems. Google's privacy policy applies to how Google Play
+handles data.</p>
+<p>The app has no in-app purchases today. If that changes, this policy will be updated first.</p>
+
+<h2>Keeping data safe</h2>
+<p>Your data stays on your device and is protected by your device's own security. Keep in mind that
+MultiCam's connection is not encrypted (see above), and that files you share or save to the Gallery
+can be read by the apps you send them to or that can read your gallery.</p>
 
 <h2>Children</h2>
-<p>The app collects no personal information from anyone, including children.</p>
+<p>The app sends no personal information to us from anyone, including children.</p>
 
-<h2>Deleting your data</h2>
-<p>Uninstalling the app removes every video and setting it created. Copies you chose to
-save to the Gallery are yours and are not touched by the app; delete them in your
-gallery app if you want them gone.</p>
+<h2>Keeping and deleting your data</h2>
+<p>We keep none of your data, because the app never sends it to us. The exceptions are:</p>
+<ul>
+  <li>What you choose to send us yourself. Diagnostic logs and device surveys are deleted as
+      described above; an email that carries one is deleted with it, within the same 90 days. Other
+      emails are used only to reply and handle your request, and are deleted within one year after
+      it is resolved or after our last reply, whichever comes first. These pass through the service
+      you use to send them (for example, email or a messaging app).</li>
+  <li>Crash reports from Google Play (see above). They stay in Google Play Console, kept by Google
+      for the period Google sets; we do not copy them elsewhere.</li>
+</ul>
+<p>On your device, data stays until you delete it, except as noted under MultiCam. You can delete
+videos in the app, and uninstalling the app removes every video and setting it created. Copies you
+saved to the Gallery, shared, or sent to a MultiCam viewing device are not touched by the app;
+delete them where they are.</p>
 
 <h2>Changes</h2>
-<p>If this policy ever changes, the updated version will be posted on this page with
-a new date.</p>
+<p>If this policy ever changes, the updated version will be posted on this page with a new date.</p>
 
 <h2>Contact</h2>
-<p>Questions about this policy: <a href="mailto:freestylemogulapps@gmail.com">freestylemogulapps@gmail.com</a></p>
+<p>Questions about this policy: <a href="mailto:freestylemogulapps@gmail.com">freestylemogulapps@gmail.com</a><br>
+When you email us, we receive your email address, your name if your email shows it, and what you
+write and attach.</p>
 
 <hr>
 
 <h1>FrameReplay for Android プライバシーポリシー</h1>
-<p class="sub">最終更新日: 2026年9月5日 · <a href="../../privacy/">iPhone 版はこちら</a></p>
+<p class="sub">最終更新日: 2026年11月8日 · <a href="../../privacy/">iPhone 版はこちら</a></p>
 
-<p><strong>FrameReplay はいかなるデータも収集しません。</strong>
+<p><strong>FrameReplay は、当方へいかなるデータも送りません。</strong>
 アカウント登録はなく、当方のサーバーもありません。
-アプリがインターネットに接続することはありません。送信する先そのものを持ちません。</p>
+アプリにはインターネット上の送信先がありません。アプリが行う通信は MultiCam だけです。
+MultiCam は利用者がオンにしない限り動かず、同じローカルネットワーク（Wi-Fi か有線）の端末とだけ通信します（下記）。
+利用者がご自身で当方へ送るもの（メールや診断ログなど）と、Google Play から当方へ届くことがある落ちたときの記録は、下記のとおり扱います。</p>
+
+<h2>提供者</h2>
+<p>FrameReplay for Android は FreestyleMogulApps が提供しています。</p>
 
 <h2>アプリが保存するもの</h2>
 <ul>
-  <li>撮影した動画は、お使いの端末内のアプリ専用領域に保存されます。</li>
-  <li>設定（操作の大きさ）も端末内に保存されます。</li>
-  <li>アップロード、当方でのバックアップ、第三者との共有は一切行いません。</li>
+  <li>撮影した動画と読み込んだ動画は、お使いの端末内のアプリ専用領域に保存されます。</li>
+  <li>リプレイと連続モードの直近の映像は一時ファイルとして保存され、順に上書きされます。</li>
+  <li>設定、入力した選手の名前、動画と選手の結び付き、描いた線や文字、お気に入りも端末内に保存されます。</li>
+  <li>アップロードや当方へのバックアップは行いません。Android のクラウドへのバックアップは切ってあります。
+      機種変更のときの端末から端末への移行では、Android がアプリのデータを新しい端末へ写すことがあります。</li>
 </ul>
 
 <h2>保存と共有について</h2>
 <ul>
-  <li><strong>ギャラリーに保存</strong> — 選んだ動画を端末の Movies フォルダ（Movies/FrameReplay）に
-      複製し、ギャラリーアプリから見えるようにします。複製は利用者ご自身のものであり、
-      アプリがギャラリーを読み取ることはありません。</li>
-  <li><strong>共有</strong> — 選んだ動画を Android の共有画面に渡します。その先（メッセージアプリ、
-      クラウド、別の端末など）は利用者ご自身の選択であり、送り先のアプリのプライバシーポリシーに従います。</li>
-  <li>どちらも、利用者が押したときにだけ動きます。アプリが自動で行うことはありません。</li>
+  <li><strong>ギャラリーに保存</strong> — 選んだ動画を端末の Movies フォルダ（Movies/FrameReplay）に複製し、
+      ギャラリーアプリから見えるようにします。保存した比較やスローの動画も同じです。
+      複製は利用者ご自身のものであり、アプリがギャラリーを読み取ることはありません。</li>
+  <li><strong>共有</strong> — 選んだ動画を Android の共有画面に渡します。録画した説明の動画も同じです。
+      その先（メッセージアプリ、クラウド、別の端末など）は利用者ご自身の選択であり、送り先のアプリのプライバシーポリシーに従います。</li>
+  <li>どちらも、利用者が選んだときにだけ動きます。ただし 2 点あります。設定で「撮ったら保存する」をオンにすると
+      （既定はオフ）、撮った動画はギャラリーにも保存されます。また、説明の録画を止めたとき、または録画中に
+      その画面やアプリを離れたときは、送り先を選べるよう共有画面が開きます。選ぶまでは何も送られません。</li>
+  <li><strong>ファイル名の選手名</strong> — 選手を付けた動画を保存・共有すると、ファイル名に選手の名前が入り（既定で入ります）、
+      ファイルと一緒に端末の外へ出ます。「撮ったら保存する」で保存した動画も同じです。名簿の画面で入れないようにできます。</li>
+</ul>
+
+<h2>動画の読み込みについて</h2>
+<p>読み込むときは、Android の写真の選択画面で動画を選びます。アプリは選んだ動画だけをアプリ専用領域へ複製します。
+ほかの写真や動画にアクセスすることはありません。</p>
+
+<h2>MultiCam について</h2>
+<p>MultiCam は既定でオフです。この端末を「カメラになる」にすると、次のように動きます。</p>
+<ul>
+  <li>同じネットワークで見る端末（FrameReplay を入れた iPhone・iPad）を探し、同じグループ名の端末につなぎます。
+      グループ名は決めるまで空で、空のままだと、グループ名の無い見る端末にもつながります。
+      そのネットワークで同じグループ名を使う人は、この端末に撮影を始めさせ、送るものを受け取れます。
+      ご自身で決めたグループ名をお使いください。</li>
+  <li>見る端末の合図で撮影し、撮れた動画は合図をくれた端末へ送ります。カメラになっている間に手で撮った動画は、
+      つながっている見る端末すべてへ送ります。まだどこにもつながっていないときは、アプリを開いている間は待ち、
+      同じグループで最初につながった見る端末へ送ります。</li>
+  <li>送った動画を残す設定をオフにすると（既定はオン）、送り終えた動画がこの端末から消えることがあります。
+      お気に入り、お手本、送り終えた時点でこの端末のいちばん新しい 1 本は残ります。</li>
+  <li>あわせて次のものを送ります：動画のファイル名、フレームレート、撮った時刻／この端末に付けた名前（なければ機種名）／
+      アプリが作ったこの端末の番号（ランダム）／2 秒ごとに、温度の状態、空き容量、電池残量、充電中か、フレームレート。</li>
+  <li>選手の名前、線や文字は送りません。</li>
+  <li>使うのは Wi-Fi か有線のネットワークだけです。モバイル回線は使いません。当方を経由しません。</li>
+  <li><strong>この通信は暗号化していません。</strong>信頼できるネットワークでお使いください。</li>
+  <li>見る端末に届いた動画は、その端末で削除するまで残ります。</li>
 </ul>
 
 <h2>権限について</h2>
 <ul>
   <li><strong>カメラ</strong> — 動画を撮影するために必要です。それ以外の用途には使いません。</li>
-  <li>音声は録音しません。マイクの権限は求めません。</li>
-  <li>位置情報、連絡先、写真やファイルへのアクセスも求めません。</li>
+  <li><strong>マイク</strong> — 説明の動画を初めて録るときに許可を求めます。声はその動画にだけ入ります。
+      通常の撮影に音声は入らず、裏で音を聞くこともありません。</li>
+  <li><strong>インターネットとネットワークの状態</strong> — 上記の MultiCam にだけ使います。Android が確認なしで許可する権限です。</li>
+  <li>位置情報、連絡先、写真やファイルへのアクセスは求めません。</li>
 </ul>
 
 <h2>診断ログについて</h2>
-<p>アプリは「録画を始めた」「フレームレート 240」のような、アプリの動作の短い記録を持っています。
-動画、名前、個人情報は含まれません。不具合の原因を調べるために、利用者が設定画面から
-当方へ共有することを選ばない限り、端末の外へ出ることはありません。</p>
+<p>アプリは「録画を始めた」「フレームレート 240」のような、動作の短い記録を持っています。エラーの文や、落ちたときの
+内容も含みます。アプリの版、動画のファイル名（撮った日時が分かります）、MultiCam を使うときは
+グループ名、この端末の名前（付けていなければ機種名）、つないだ相手の端末の名前が入ります。動画は入りません。
+選手の名前も書きませんが、スローの動画の保存に失敗したときは、選手名を含むことがあるそのファイル名が入ります。
+不具合の原因を調べるために、利用者が設定画面から共有することを選ばない限り、端末の外へ出ることはありません。
+当方へ共有された場合は、その不具合の調査にだけ使い、解決したら削除します。遅くとも受け取りから 90 日で削除します。</p>
+
+<h2>機種調査について</h2>
+<p>設定の「機種調査」は、端末のメーカー・機種名・開発名・Android の版と、カメラと動画の符号化の性能を書き出します。
+利用者がその画面を開いたときにだけ作られ、共有しない限り端末の外へ出ません。当方へ共有された場合は、診断ログと同じように扱います。</p>
 
 <h2>トラッキング・解析・広告について</h2>
-<p>解析ツール、クラッシュ収集、広告識別子、第三者製のコードのいずれも使用していません。
-利用者のプロファイルを作成することはなく、データを第三者に提供・販売することもありません。</p>
+<p>解析ツール、広告識別子はなく、アプリの中に当方へクラッシュを送る仕組みはありません。アプリの動作には Google（AndroidX・Guava）と
+JetBrains（Kotlin）の標準的なライブラリを使っています。利用者のプロファイルを作成することはなく、
+当方がデータを第三者に提供・販売することもありません。</p>
+<p>利用者が端末の設定で Google への使用状況と診断情報の共有を許している場合、アプリが落ちたときの記録
+（機種、Android の版、落ちた箇所など）が Google Play を通じて当方に届くことがあります。不具合を直すためにだけ使います。
+Google Play でのデータの扱いには、Google のプライバシーポリシーが適用されます。</p>
+<p>現在、アプリ内課金はありません。入れるときは、その前に本ポリシーを更新します。</p>
+
+<h2>データの安全について</h2>
+<p>データは端末の中にあり、端末自体の保護で守られます。ただし、MultiCam の通信は暗号化していないこと（上記）、
+共有やギャラリーへ保存したファイルは、送り先のアプリやギャラリーを読めるアプリから読めることにご注意ください。</p>
 
 <h2>お子様について</h2>
-<p>お子様を含め、いかなる利用者からも個人情報を収集しません。</p>
+<p>アプリは、お子様を含め、いかなる利用者の個人情報も当方へ送りません。</p>
 
-<h2>データの削除</h2>
-<p>アプリをアンインストールすると、アプリが作成した動画と設定はすべて削除されます。
-ギャラリーへ保存したコピーは利用者ご自身のものであり、アプリは触れません。
-不要な場合はギャラリーアプリ側で削除してください。</p>
+<h2>データの保存と削除</h2>
+<p>アプリはデータを当方へ送らないので、当方は保存していません。例外は次のとおりです。</p>
+<ul>
+  <li>利用者がご自身で当方へ送るもの。診断ログと機種調査は上記のとおり削除し、それが付いたメールも同じ 90 日以内にメールごと削除します。
+      そのほかのメールは返信と対応にだけ使い、対応が終わってから、または当方の最後の返信から、早いほうの 1 年以内に削除します。
+      これらは、送るのに使うサービス（メールやメッセージのアプリなど）を通ります。</li>
+  <li>Google Play を通じて届く落ちたときの記録（上記）。Google Play Console の中にあり、Google が定める期間、Google が保管します。当方がほかへ写すことはありません。</li>
+</ul>
+<p>端末の中のデータは、削除するまで残ります（MultiCam の節に書いた例外を除く）。アプリの中で動画を削除でき、アプリをアンインストールすると、
+アプリが作成した動画と設定はすべて削除されます。ギャラリーへ保存したコピー、共有したもの、
+MultiCam で見る端末へ送った動画にはアプリは触れません。それぞれの場所で削除してください。</p>
 
 <h2>変更について</h2>
 <p>本ポリシーを変更する場合は、更新日を改めたうえでこのページに掲載します。</p>
 
 <h2>お問い合わせ</h2>
-<p>本ポリシーに関するお問い合わせ: <a href="mailto:freestylemogulapps@gmail.com">freestylemogulapps@gmail.com</a></p>
+<p>本ポリシーに関するお問い合わせ: <a href="mailto:freestylemogulapps@gmail.com">freestylemogulapps@gmail.com</a><br>
+メールをいただくと、当方にはメールアドレス、表示される場合はお名前、本文と添付が届きます。</p>
 
 </body>
 </html>
