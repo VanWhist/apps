@@ -1,0 +1,57 @@
+/* HP編集モード（edit.html）。HPそのものは枠（iframe）の中で、いつもの style.css で表示される */
+:root{--ink:#1d1f3f;--ink-2:#4a4d6e;--cream:#fffaf2;--line:#ece5d8;--sun:#ffc93c;--sun-d:#e8a900;--sun-soft:#fff3cc;--coral:#ff6b57;--coral-t:#b83a29;--teal:#16a89a;--teal-t:#0a6f63;--teal-soft:#e2f6f3}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;display:flex;flex-direction:column;background:#e9e6df;color:var(--ink);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Meiryo",sans-serif;font-size:15px;line-height:1.6}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ed-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 14px;background:var(--ink);color:#fff}
+.ed-back{color:#fff;font-weight:700;text-decoration:none;font-size:14px}
+.ed-pagesel select{font:700 15px/1 inherit;font-family:inherit;padding:8px 10px;border-radius:10px;border:0;min-height:38px}
+.ed-mode{margin-left:auto;font-size:12.5px;background:var(--sun);color:var(--ink);padding:4px 10px;border-radius:99px;font-weight:700}
+.ed-mode:empty{display:none}
+.ed-wrap{flex:1;display:flex;min-height:0}
+.ed-site{position:relative;flex:1;min-width:0;padding:12px}
+.ed-site iframe{width:100%;height:100%;border:0;border-radius:12px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.12)}
+.ed-loading{position:absolute;top:30px;left:0;right:0;text-align:center;color:var(--ink-2)}
+.ed-loading[hidden]{display:none}
+.ed-panel{width:380px;flex:none;background:var(--cream);border-left:1px solid var(--line);overflow-y:auto}
+.ed-panel-in{padding:12px 14px 30px}
+.ed-grip{display:none}
+.ed-who{margin:0 0 8px;font-size:13px;color:var(--ink-2)}
+.ed-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 10px}
+.ed-box h2{margin:0 0 6px;font-size:15px}
+.ed-hint{margin:0 0 6px;font-size:13px;color:var(--ink-2)}
+.ed-hint[hidden],[hidden]{display:none!important}
+.ed-where{margin:0 0 6px;font-weight:700;font-size:13.5px;display:flex;justify-content:space-between;gap:6px;align-items:flex-start}
+.ed-box textarea,.ed-box select{width:100%;font:16px/1.5 inherit;font-family:inherit;color:var(--ink);background:var(--cream);border:2px solid var(--line);border-radius:12px;padding:8px 10px;margin:0 0 8px}
+.ed-box textarea:focus{border-color:var(--ink);outline:none}
+.ed-btns{display:flex;gap:8px;flex-wrap:wrap}
+.ed-btn{min-height:44px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:#fff;font:700 14.5px/1 inherit;font-family:inherit;color:var(--ink);cursor:pointer}
+.ed-btn.main{background:var(--sun);border-color:var(--sun-d);box-shadow:0 3px 0 var(--sun-d);flex:1}
+.ed-btn:disabled{opacity:.45;cursor:default;box-shadow:none}
+.ed-chip{display:block;width:100%;text-align:left;margin:0 0 6px;padding:8px 10px;border-radius:10px;border:1px solid var(--sun-d);background:var(--sun-soft);font:13.5px/1.4 inherit;font-family:inherit;color:var(--ink);cursor:pointer}
+.ed-ex{margin:0 0 6px}
+.ed-reply{margin:8px 0 0;font-size:13.5px}
+.ed-pend{border-color:var(--coral)}
+.ed-row{margin:0 0 10px;padding:0 0 10px;border-bottom:1px dashed var(--line)}
+.ed-ba{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;line-height:1.5}
+.ed-ba>div{border-radius:8px;padding:6px 8px;word-break:break-word;min-width:0}
+.ed-ba span{display:block;font-size:11px;font-weight:700}
+.ed-ba .b{background:#f3efe7;color:var(--ink-2)}
+.ed-ba .a{background:var(--sun-soft);border:1px solid var(--sun-d)}
+.ed-x{flex:none;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:15px;line-height:1}
+.ed-msg{margin:8px 0 0;font-size:13.5px;font-weight:700;color:var(--teal-t)}
+.ed-msg.err{color:var(--coral-t)}
+.ed-msg:empty{display:none}
+
+/* スマホ・タブレット縦：HPを全面に、パネルは下から出る */
+@media (max-width:860px){
+  .ed-wrap{flex-direction:column}
+  .ed-site{padding:0}
+  .ed-site iframe{border-radius:0}
+  .ed-panel{position:fixed;left:0;right:0;bottom:0;width:auto;max-height:62vh;border-left:0;border-top:2px solid var(--ink);border-radius:18px 18px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.18);padding-bottom:env(safe-area-inset-bottom)}
+  .ed-grip{display:block;position:sticky;top:0;z-index:1;width:100%;padding:10px;border:0;background:var(--cream);font:700 14px/1 inherit;font-family:inherit;color:var(--ink);cursor:pointer}
+  .ed-grip::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:#c9c4ba;margin:0 auto 6px}
+  .ed-panel.closed{max-height:52px;overflow:hidden}
+  .ed-panel.closed .ed-panel-in{display:none}
+}

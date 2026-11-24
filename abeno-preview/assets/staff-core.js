@@ -52,6 +52,11 @@ var StaffCore = (function () {
     adult: function (v) { return Array.isArray(v) ? '' : '大人のクラスの形が正しくありません'; }
   };
 
+  function areaOfPath(path) {
+    var root = String(path || '').split('/')[0], hit = null;
+    AREAS.forEach(function (a) { if (a.roots.indexOf(root) >= 0) hit = a; });
+    return hit;
+  }
   function areaById(id) { for (var i = 0; i < AREAS.length; i++) if (AREAS[i].id === id) return AREAS[i]; return null; }
 
   // 担当の書き方: "全部" / "news,schedule" / "お知らせ、練習日" どれでもよい
@@ -164,27 +169,37 @@ var StaffCore = (function () {
 
   /*
    * 変更案を検査して適用する。
-   * allowed: このスタッフが変えてよい項目 id の配列。area: いま開いている項目 id。
+   * allowed: このスタッフが変えてよい項目 id の配列。
+   * area: いま開いている項目 id。"*" なら（編集モード用）担当の項目すべての中で変えてよい。
    * 返り値: { data: 変更後, rows: [{where, before, after, summary}] }。だめなら Error を投げる（何も変えない）
    */
   function applyChanges(data, changes, allowed, area) {
     if (!Array.isArray(changes) || !changes.length) throw new Error('変更がありません');
     if (changes.length > MAX_CHANGES) throw new Error('一度に変える数が多すぎます（' + MAX_CHANGES + 'まで）');
-    var a = areaById(area);
-    if (!a || allowed.indexOf(area) < 0) throw new Error('この項目を変える権限がありません');
+    var areas;
+    if (area === '*') areas = allowed.map(areaById).filter(Boolean);
+    else {
+      var a = areaById(area);
+      if (!a || allowed.indexOf(area) < 0) throw new Error('この項目を変える権限がありません');
+      areas = [a];
+    }
+    var roots = [];
+    areas.forEach(function (x) { roots = roots.concat(x.roots); });
+    var label = areas.length === 1 ? '「' + areas[0].label + '」' : '担当の項目';
     var next = clone(data);
-    var rows = [];
+    var rows = [], touched = [];
     changes.forEach(function (ch) {
       if (!ch || ['set', 'add', 'remove'].indexOf(ch.op) < 0) throw new Error('変更のしかたが正しくありません');
       var root = splitPath(ch.path)[0];
-      if (a.roots.indexOf(root) < 0) throw new Error('「' + a.label + '」以外の場所は変えられません: ' + ch.path);
+      if (roots.indexOf(root) < 0) throw new Error(label + '以外の場所は変えられません: ' + ch.path);
+      if (touched.indexOf(root) < 0) touched.push(root);
       var parts = splitPath(ch.path);
       var before = ch.op === 'add' && Array.isArray(getAt(next, parts.slice(0, -1))) ? undefined : getAt(next, parts);
       var where = describe(next, ch.path, ch.op);
       applyOne(next, ch);
       rows.push({ op: ch.op, where: where, before: show(before), after: ch.op === 'remove' ? '（削除）' : show(JSON.parse(ch.value_json)), summary: String(ch.summary || '') });
     });
-    a.roots.forEach(function (r) {
+    touched.forEach(function (r) {
       if (CHECKS[r]) { var msg = CHECKS[r](next[r]); if (msg) throw new Error(msg); }
     });
     if (JSON.stringify(next).length > 400000) throw new Error('データが大きくなりすぎます');
@@ -210,7 +225,7 @@ var StaffCore = (function () {
   function serialize(header, data) { return header + MARK + JSON.stringify(data, null, 2) + ';\n'; }
 
   return {
-    AREAS: AREAS, areaById: areaById, parseAllowed: parseAllowed,
+    AREAS: AREAS, areaById: areaById, areaOfPath: areaOfPath, parseAllowed: parseAllowed,
     applyChanges: applyChanges, areaData: areaData, describe: describe, fmtDate: fmtDate,
     parseFile: parseFile, serialize: serialize
   };

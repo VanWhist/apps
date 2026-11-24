@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HP編集モード（スタッフ用）｜アベノジュニア</title>
+<meta name="theme-color" content="#1d1f3f">
+<!-- スタッフ専用。検索エンジンに載せない（公開後も消さない） -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='11' r='6' fill='%23ff6b57'/%3E%3Cpath d='M4 30 Q20 40 36 30' stroke='%231d1f3f' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/edit.css">
+</head>
+<body>
+<header class="ed-bar">
+  <a class="ed-back" href="staff.html">← 更新ページ</a>
+  <label class="ed-pagesel"><span class="sr">ページ</span>
+    <select id="page"></select>
+  </label>
+  <span class="ed-mode" id="mode"></span>
+</header>
+
+<div class="ed-wrap">
+  <div class="ed-site">
+    <iframe id="site" title="HPのプレビュー（直したい文字をクリック）"></iframe>
+    <p class="ed-loading" id="loading">読み込み中…</p>
+  </div>
+
+  <aside class="ed-panel" id="panel" aria-label="編集">
+    <button type="button" class="ed-grip" id="grip" aria-expanded="true">編集パネル</button>
+    <div class="ed-panel-in">
+      <p class="ed-who" id="who"></p>
+
+      <!-- 選んだ文字を直す -->
+      <section class="ed-box" id="box-edit">
+        <h2>1. 直したい文字をクリック</h2>
+        <p class="ed-hint" id="edit-hint">左のHPで、点線の枠が出る文字をクリックすると、ここで直せます。枠が出ない所（住所・ボタンなど）はこの画面では直せません。</p>
+        <div id="edit-form" hidden>
+          <p class="ed-where" id="edit-where"></p>
+          <div id="edit-choose" class="ed-choose" hidden></div>
+          <label class="sr" for="edit-text">新しい文字</label>
+          <textarea id="edit-text" rows="3"></textarea>
+          <div class="ed-btns">
+            <button type="button" class="ed-btn main" id="edit-add">この変更を加える</button>
+            <button type="button" class="ed-btn" id="edit-cancel">やめる</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- AIに頼む -->
+      <section class="ed-box">
+        <h2>まとめて頼む（AI）</h2>
+        <p class="ed-hint">お知らせを足す・練習日を休みにするなど、クリックでは難しいことはここに書いてください。</p>
+        <label class="sr" for="ai-area">項目</label>
+        <select id="ai-area"></select>
+        <label class="sr" for="ai-text">依頼</label>
+        <textarea id="ai-text" rows="2" placeholder="例：11月28日のキッズはお休み"></textarea>
+        <div class="ed-ex" id="ai-ex"></div>
+        <div class="ed-btns"><button type="button" class="ed-btn" id="ai-send">AIに案を作ってもらう</button></div>
+        <p class="ed-reply" id="ai-reply" aria-live="polite"></p>
+      </section>
+
+      <!-- 変更点の表 -->
+      <section class="ed-box ed-pend">
+        <h2>2. 変更点（まだ反映していません）</h2>
+        <div id="pending"><p class="ed-hint">まだありません。HPのプレビューには、加えた変更がすぐ映ります。</p></div>
+        <div class="ed-btns">
+          <button type="button" class="ed-btn main" id="apply" disabled>3. まとめてHPに反映する</button>
+          <button type="button" class="ed-btn" id="clear" hidden>全部やめる</button>
+        </div>
+        <p class="ed-msg" id="msg" role="status"></p>
+      </section>
+    </div>
+  </aside>
+</div>
+
+<script src="data/staff-config.js"></script>
+<script src="data/site-data.js"></script>
+<script src="assets/staff-core.js"></script>
+<script src="assets/staff-api.js"></script>
+<script src="assets/edit.js"></script>
+</body>
+</html>
