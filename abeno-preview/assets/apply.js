@@ -150,7 +150,7 @@
         var firstOpen = state.slots.find(function (s) { return Core.view(s, state.settings).selectable; });
         state.month = firstOpen ? firstOpen.date.slice(0, 7) : months[0];
       }
-      renderRule(); renderMonths(); renderSlots(); renderBar();
+      renderRule(); renderMonths(); renderSlots(); renderPicked(); renderBar();
     }).catch(function () {
       $('ap-slots').innerHTML = '<p class="ap-empty">日程を読み込めませんでした。時間をおいて開き直すか、下のお問合せからご連絡ください。</p>';
     });
@@ -202,7 +202,7 @@
       state.picked.push(id);
     }
     state.picked.sort(function (a, b) { var x = state.byId[a], y = state.byId[b]; return (x.date + x.start).localeCompare(y.date + y.start); });
-    renderSlots(); renderBar();
+    renderSlots(); renderPicked(); renderBar();
   }
   function pickedText() {
     return state.picked.map(function (id) { var s = state.byId[id]; return md(s.date) + ' ' + s.start; }).join('、');
@@ -257,18 +257,36 @@
       elapsedMs: Date.now() - state.startedAt
     };
   }
+  function slotLine(id) { var s = state.byId[id]; return md(s.date) + ' ' + s.start + '〜' + s.end + ' ' + s.cls; }
+  function group(title, body, step, focus) {
+    return '<section class="ap-grp"><div class="ap-grp-h"><h3>' + title + '</h3>' +
+      (step ? '<button type="button" class="ap-fix" data-goto="' + step + '"' + (focus ? ' data-focus="' + focus + '"' : '') + '>修正</button>' : '') + '</div>' + body + '</section>';
+  }
   function renderConfirm() {
     var p = payload();
-    var kids = p.kids.map(function (k) { return esc(k.name) + '（' + esc(k.grade) + '）'; }).join('<br>');
-    var slots = p.slots.map(function (id) { var s = state.byId[id]; return esc(md(s.date) + ' ' + s.start + '〜' + s.end + ' ' + s.cls); }).join('<br>');
-    $('ap-confirm').innerHTML = '<ul class="ap-sum">' +
-      '<li><b>日にち</b><span>' + slots + '</span></li>' +
-      '<li><b>参加する人</b><span>' + kids + '</span></li>' +
-      '<li><b>保護者</b><span>' + esc(p.parent.name) + '</span></li>' +
-      '<li><b>電話</b><span>' + esc(p.parent.tel) + '</span></li>' +
-      '<li><b>メール</b><span>' + esc(p.parent.email) + '</span></li>' +
-      (p.parent.note ? '<li><b>ご質問</b><span>' + esc(p.parent.note) + '</span></li>' : '') +
-      '</ul><p class="ap-msg">体験料は1人500円（当日現金）です。' + (p.kids.length > 1 ? '兄弟・姉妹は同じ時間にご一緒に参加します。' : '') + '</p>';
+    var slots = '<ul class="ap-list">' + p.slots.map(function (id) { return '<li>' + esc(slotLine(id)) + '</li>'; }).join('') + '</ul>';
+    var kids = '<ul class="ap-list">' + p.kids.map(function (k) { return '<li>' + esc(k.name) + '（' + esc(k.kana) + '）・' + esc(k.grade) + '</li>'; }).join('') + '</ul>';
+    var parent = '<dl class="ap-dl"><dt>お名前</dt><dd>' + esc(p.parent.name) + '</dd><dt>電話</dt><dd>' + esc(p.parent.tel) + '</dd><dt>メール</dt><dd>' + esc(p.parent.email) + '</dd>' +
+      (p.parent.note ? '<dt>ご質問</dt><dd>' + esc(p.parent.note) + '</dd>' : '') + '</dl>';
+    $('ap-confirm').innerHTML =
+      group('日にち（' + p.slots.length + 'コマ）', slots, 1) +
+      group('参加する人（' + p.kids.length + '人）', kids, 2) +
+      group('保護者の方', parent, 2, '#ap-parent') +
+      '<p class="ap-msg">体験料は1人500円（当日現金）です。' + (p.kids.length > 1 ? '兄弟・姉妹は同じ時間にご一緒に参加します。' : '') + '</p>';
+  }
+  // 1の画面：選んだ日にちの一覧（×で外せる）
+  function renderPicked() {
+    var el = $('ap-picked');
+    if (!state.picked.length) { el.innerHTML = ''; return; }
+    el.innerHTML = '<p class="ap-picked-h">選んだ日にち（' + state.picked.length + '/' + state.settings.maxSlots + '）</p><ul>' +
+      state.picked.map(function (id) {
+        return '<li><span>' + esc(slotLine(id)) + '</span><button type="button" class="ap-x" data-unpick="' + esc(id) + '" aria-label="' + esc(slotLine(id)) + 'を外す">×</button></li>';
+      }).join('') + '</ul>';
+  }
+  // 2の画面：1で選んだ日にちを上に出す
+  function renderChosen() {
+    $('ap-chosen2').innerHTML = '<div class="ap-grp ap-grp-sm"><div class="ap-grp-h"><h3>✓ 選んだ日にち（' + state.picked.length + 'コマ）</h3><button type="button" class="ap-fix" data-goto="1">変更</button></div>' +
+      '<ul class="ap-list">' + state.picked.map(function (id) { return '<li>' + esc(slotLine(id)) + '</li>'; }).join('') + '</ul></div>';
   }
   function send() {
     if (state.sending) return;                       // 連打しても1回だけ
@@ -310,17 +328,20 @@
   }
 
   // ---------- 画面の切り替え ----------
-  function go(n) {
+  function go(n, focusSel) {
     state.step = n;
     Array.prototype.forEach.call(document.querySelectorAll('[data-panel]'), function (el) { el.hidden = +el.getAttribute('data-panel') !== n; });
     Array.prototype.forEach.call(document.querySelectorAll('.ap-steps li'), function (li) {
       var k = +li.getAttribute('data-step'); li.className = k === n ? 'on' : k < n ? 'done' : '';
     });
-    if (n === 2) renderKids();
+    if (n === 2) { renderKids(); renderChosen(); }
     if (n === 3) renderConfirm();
     renderBar();
     var h = document.querySelector('[data-panel="' + n + '"] h2');
-    window.scrollTo(0, 0);
+    var target = focusSel ? document.querySelector(focusSel) : null;
+    // ページ全体は「なめらかスクロール」設定なので、ここは即座に移動させる（次の画面の途中から始まらないように）
+    if (target) target.scrollIntoView({ behavior: 'instant', block: 'start' });
+    else { var top = document.getElementById('ap').getBoundingClientRect().top + window.pageYOffset - 70; window.scrollTo({ top: Math.max(0, top), behavior: 'instant' }); }
     if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
   }
   function renderBar() {
@@ -350,6 +371,8 @@
     else if (t.hasAttribute('data-m')) { state.month = t.getAttribute('data-m'); renderMonths(); renderSlots(); }
     else if (t.id === 'ap-add') { syncKids(); state.kids.push({ name: '', kana: '', grade: '' }); renderKids(); renderBar(); }
     else if (t.hasAttribute('data-del')) { syncKids(); state.kids.splice(+t.getAttribute('data-del'), 1); renderKids(); renderBar(); }
+    else if (t.hasAttribute('data-unpick')) togglePick(t.getAttribute('data-unpick'));
+    else if (t.hasAttribute('data-goto')) { if (state.step === 2) syncKids(); go(+t.getAttribute('data-goto'), t.getAttribute('data-focus')); }
     else if (t.id === 'ap-prev') { if (state.step === 2) syncKids(); go(state.step - 1); }
     else if (t.id === 'ap-next') {
       if (state.step === 1 && state.picked.length) go(2);
