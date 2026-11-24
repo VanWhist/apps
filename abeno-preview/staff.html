@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HP更新ページ（スタッフ用）｜アベノジュニア</title>
+<meta name="theme-color" content="#fffaf2">
+<!-- スタッフ専用。検索エンジンに載せない（公開後も消さない） -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='11' r='6' fill='%23ff6b57'/%3E%3Cpath d='M4 30 Q20 40 36 30' stroke='%231d1f3f' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/staff.css">
+</head>
+<body class="st-body">
+<noscript><p class="noscript">このページは JavaScript を使っています。</p></noscript>
+<div class="proto" id="st-mode">スタッフ用</div>
+
+<header class="hd">
+  <span class="brand">
+    <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="11" r="6" fill="#ff6b57"/><path d="M4 30 Q20 40 36 30" stroke="#1d1f3f" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M8 33 L8 37 M32 33 L32 37" stroke="#1d1f3f" stroke-width="3" stroke-linecap="round"/></svg>
+    <span class="brand-txt">HP更新<small>STAFF ONLY</small></span>
+  </span>
+  <button type="button" class="st-pill" id="st-logout" hidden>ログアウト</button>
+</header>
+
+<main class="st" id="st" tabindex="-1">
+
+  <!-- 1. ログイン -->
+  <section id="v-login" class="st-view" hidden>
+    <h1 class="st-h1">ログイン</h1>
+    <div id="login-demo" class="st-demo" hidden>
+      <p><b>確認モード</b>です。見本のスタッフを選ぶと、担当ごとの見え方を試せます。</p>
+      <div class="st-demo-list" id="demo-staff"></div>
+    </div>
+    <form id="f-email" class="st-panel" novalidate>
+      <label class="st-label" for="in-email">登録したメールアドレス</label>
+      <input id="in-email" type="email" inputmode="email" autocomplete="email" required placeholder="example@gmail.com">
+      <p class="st-note">6桁のログインコードをメールで送ります。パスワードはいりません。</p>
+      <button class="btn btn-main st-wide" type="submit">コードを送る</button>
+    </form>
+    <form id="f-code" class="st-panel" novalidate hidden>
+      <p class="st-note" id="code-sent"></p>
+      <label class="st-label" for="in-code">6桁のコード</label>
+      <input id="in-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="\d{6}" required placeholder="123456">
+      <button class="btn btn-main st-wide" type="submit">ログイン</button>
+      <button class="st-link" type="button" id="code-back">メールアドレスを入れ直す</button>
+    </form>
+    <p class="st-err" id="login-err" role="alert"></p>
+  </section>
+
+  <!-- 2. 項目を選ぶ -->
+  <section id="v-home" class="st-view" hidden>
+    <h1 class="st-h1"><span id="me-name"></span> さん</h1>
+    <p class="st-lead">どこを更新しますか？</p>
+    <div class="st-areas" id="areas"></div>
+    <h2 class="st-h2">最近の更新</h2>
+    <ul class="st-recent" id="recent"></ul>
+  </section>
+
+  <!-- 3. 会話で更新 -->
+  <section id="v-edit" class="st-view" hidden>
+    <button class="st-pill st-backbtn" type="button" id="edit-back">← 項目を選ぶ</button>
+    <h1 class="st-h1" id="edit-title"></h1>
+    <details class="st-now" id="now-box">
+      <summary>いまの内容を見る</summary>
+      <div id="now"></div>
+    </details>
+    <div class="st-chat" id="chat" aria-live="polite"></div>
+    <div class="st-examples" id="examples"></div>
+    <form id="f-chat" class="st-input">
+      <label class="sr" for="in-msg">依頼を書く</label>
+      <textarea id="in-msg" rows="2" placeholder="例：12月5日のキッズはお休みにしてください"></textarea>
+      <button class="btn btn-main" type="submit" id="send">送る</button>
+    </form>
+  </section>
+</main>
+
+<script src="data/staff-config.js"></script>
+<script src="data/site-data.js"></script>
+<script src="assets/staff-core.js"></script>
+<script src="assets/staff.js"></script>
+</body>
+</html>
