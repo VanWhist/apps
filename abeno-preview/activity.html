@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>活動・動画｜アベノジュニアトランポリンクラブ</title>
+<meta name="description" content="日々の活動（Instagram）、バッジテストのお手本、縦回転への道。">
+<meta name="theme-color" content="#fffaf2">
+<!-- 試作の間は検索エンジンに載せない。公開するときにこの1行を消す -->
+<meta name="robots" content="noindex, nofollow">
+<!-- 公開URLが決まったら canonical / og:url / og:image を足す（今は未定） -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:site_name" content="アベノジュニアトランポリンクラブ">
+<meta property="og:title" content="活動・動画｜アベノジュニアトランポリンクラブ">
+<meta property="og:description" content="日々の活動（Instagram）、バッジテストのお手本、縦回転への道。">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='11' r='6' fill='%23ff6b57'/%3E%3Cpath d='M4 30 Q20 40 36 30' stroke='%231d1f3f' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<!-- 見出しだけ丸ゴシックの Web フォント。本文は端末の標準フォント（表示を速くするため） -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="activity">
+<a class="skip" href="#top">本文へスキップ</a>
+<noscript><p class="noscript">このページは JavaScript を使っています。表示されない場合はお電話・メールでお問い合わせください。</p></noscript>
+
+<div class="proto">試作 第3版（非公開）</div>
+
+<header class="hd">
+  <a class="brand" href="index.html">
+    <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="11" r="6" fill="#ff6b57"/><path d="M4 30 Q20 40 36 30" stroke="#1d1f3f" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M8 33 L8 37 M32 33 L32 37" stroke="#1d1f3f" stroke-width="3" stroke-linecap="round"/></svg>
+    <span class="brand-txt">アベノジュニア<small>TRAMPOLINE CLUB</small></span>
+  </a>
+  <a class="hd-cta" href="apply.html">体験レッスン</a>
+  <button class="menu-btn" aria-label="メニュー" aria-expanded="false" aria-controls="nav"><span></span><span></span></button>
+</header>
+<!-- メニューの中身は assets/app.js の PAGES から作る（全ページ共通） -->
+<nav id="nav" class="nav" aria-label="サイトメニュー" data-render="siteNav" hidden></nav>
+
+<main id="top" tabindex="-1">
+
+  <div class="phead">
+    <p class="eyebrow">ACTIVITY</p>
+    <h1>活動・動画</h1>
+  </div>
+
+  <section class="sec white" id="insta">
+    <h2>日々の活動</h2>
+    <div class="ig" data-render="instagram" data-max="12"></div>
+  </section>
+
+  <section class="sec" id="badge">
+    <h2>バッジテストのお手本</h2>
+    <div data-render="videos" data-group="badge"></div>
+  </section>
+
+  <section class="sec white" id="tate">
+    <h2>縦回転への道</h2>
+    <div data-render="videos" data-group="tate"></div>
+  </section>
+
+  <section class="sec" id="results">
+    <h2>実績</h2>
+    <div class="flash" data-render="flash"></div>
+    <a class="more" href="news.html">大会結果などのお知らせ<i aria-hidden="true">→</i></a>
+  </section>
+
+  <!-- FINAL -->
+  <section class="final">
+    <h2>まずは1回、<br>跳んでみよう。</h2>
+    <p>体験は500円・1回限り。見学や質問だけでもどうぞ。</p>
+    <a class="btn btn-main" href="apply.html">体験レッスンを申し込む<i aria-hidden="true">→</i></a>
+  </section>
+</main>
+
+<footer class="ft">
+  <nav class="ft-nav" aria-label="フッターメニュー" data-render="siteNav"></nav>
+  <div class="ft-sns" data-render="sns"></div>
+  <p><span data-text="club.name"></span>（<span data-text="club.founded"></span>設立）<br>代表 <span data-text="club.representative"></span><br><span data-text="club.address"></span></p>
+  <p class="copy">Copyright © アベノジュニアトランポリンクラブ All Rights Reserved.</p>
+</footer>
+
+<div class="bar">
+  <div class="bar-in">
+    <span class="bar-price">体験<b>500円</b></span>
+    <a class="btn btn-main sm" href="apply.html">体験を申し込む</a>
+  </div>
+</div>
+
+<script src="data/site-data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

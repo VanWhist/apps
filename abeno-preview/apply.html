@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>体験レッスンのお申込み｜アベノジュニアトランポリンクラブ</title>
+<meta name="description" content="アベノジュニアトランポリンクラブ キッズ体験レッスンのお申込み。空いている日を選んで、そのまま申し込めます。">
+<meta name="theme-color" content="#fffaf2">
+<!-- 試作の間は検索エンジンに載せない。公開するときにこの1行を消す -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='11' r='6' fill='%23ff6b57'/%3E%3Cpath d='M4 30 Q20 40 36 30' stroke='%231d1f3f' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/apply.css">
+</head>
+<body class="ap-body">
+<a class="skip" href="#ap">本文へスキップ</a>
+<noscript><p class="noscript">このページは JavaScript を使っています。表示されない場合はお問合せフォームからご連絡ください。</p></noscript>
+<div class="proto">試作（非公開）<span id="ap-mode"></span></div>
+
+<header class="hd">
+  <a class="brand" href="index.html">
+    <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="11" r="6" fill="#ff6b57"/><path d="M4 30 Q20 40 36 30" stroke="#1d1f3f" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M8 33 L8 37 M32 33 L32 37" stroke="#1d1f3f" stroke-width="3" stroke-linecap="round"/></svg>
+    <span class="brand-txt">アベノジュニア<small>TRAMPOLINE CLUB</small></span>
+  </a>
+  <a class="ap-back" href="index.html#trial">← もどる</a>
+</header>
+
+<main id="ap" class="ap" tabindex="-1">
+  <p class="eyebrow">TRIAL LESSON</p>
+  <h1 class="ap-h1">体験レッスンのお申込み</h1>
+  <p class="ap-lead">空いている日を選んで、そのまま申し込めます。体験は<b>500円・1人1回</b>です。</p>
+
+  <ol class="ap-steps" aria-label="申込の流れ">
+    <li data-step="1" class="on">日にち</li><li data-step="2">参加する人</li><li data-step="3">確認</li><li data-step="4">完了</li>
+  </ol>
+
+  <!-- 1 日にちを選ぶ -->
+  <section class="ap-panel" data-panel="1" aria-labelledby="h-p1">
+    <h2 id="h-p1" class="ap-h2">1. 日にちを選ぶ</h2>
+    <p class="ap-note" id="ap-rule"></p>
+    <div class="ap-legend" aria-hidden="true"><span class="lg ok">空きあり</span><span class="lg few">残りわずか</span><span class="lg full">満員</span><span class="lg off">お休み</span></div>
+    <div class="ap-month" role="tablist" aria-label="月" id="ap-months"></div>
+    <div id="ap-slots" class="ap-slots" aria-live="polite"><p class="ap-loading">日程を読み込んでいます…</p></div>
+  </section>
+
+  <!-- 2 参加する人 -->
+  <section class="ap-panel" data-panel="2" aria-labelledby="h-p2" hidden>
+    <h2 id="h-p2" class="ap-h2">2. 参加する人</h2>
+    <p class="ap-note">兄弟・姉妹は一緒に申し込めます（同じ日・同じ時間に参加）。</p>
+    <form id="ap-form" novalidate>
+      <div id="ap-kids"></div>
+      <button type="button" class="ap-add" id="ap-add">＋ 兄弟・姉妹を追加する</button>
+
+      <fieldset class="ap-box">
+        <legend>保護者の方</legend>
+        <label class="f">お名前<em>必須</em><input name="parentName" autocomplete="name" required maxlength="40"></label>
+        <label class="f">電話番号<em>必須</em><input name="tel" type="tel" inputmode="tel" autocomplete="tel" required maxlength="20" placeholder="090-1234-5678"><small>メールが届かないときや、当日の急なご連絡に使います。</small></label>
+        <label class="f">メールアドレス<em>必須</em><input name="email" type="email" inputmode="email" autocomplete="email" required maxlength="120"><small>受付のメールをお送りします。携帯のメールの方は gmail.com からのメールを受け取れるようにしてください。</small></label>
+        <label class="f">ご質問・気になること<span class="opt">任意</span><textarea name="note" rows="3" maxlength="500"></textarea></label>
+      </fieldset>
+
+      <fieldset class="ap-box">
+        <legend>確認と同意</legend>
+        <label class="ck"><input type="checkbox" name="agreeTerms" required> 体験は1人1回まで、体験料500円を当日現金で払うことを確認しました。</label>
+        <label class="ck"><input type="checkbox" name="agreePrivacy" required> 入力した内容を、体験の連絡と受付のためだけに使うことに同意します。</label>
+      </fieldset>
+      <!-- いたずら対策（人には見えない欄。入力があれば受け付けない） -->
+      <div class="hp" aria-hidden="true"><label>会社名<input name="company" tabindex="-1" autocomplete="off"></label></div>
+      <p class="ap-err" id="ap-err2" role="alert"></p>
+    </form>
+  </section>
+
+  <!-- 3 確認 -->
+  <section class="ap-panel" data-panel="3" aria-labelledby="h-p3" hidden>
+    <h2 id="h-p3" class="ap-h2">3. 内容の確認</h2>
+    <div id="ap-confirm"></div>
+    <p class="ap-err" id="ap-err3" role="alert"></p>
+  </section>
+
+  <!-- 4 完了 -->
+  <section class="ap-panel" data-panel="4" aria-labelledby="h-p4" hidden>
+    <h2 id="h-p4" class="ap-h2">お申込みを受け付けました</h2>
+    <div id="ap-result"></div>
+    <a class="btn btn-main" href="index.html">トップへもどる<i aria-hidden="true">→</i></a>
+  </section>
+
+  <p class="ap-contact" id="ap-contact"></p>
+</main>
+
+<!-- 画面下の固定バー -->
+<div class="ap-bar" id="ap-bar">
+  <p class="ap-bar-txt" id="ap-bar-txt">日にちを選んでください</p>
+  <div class="ap-bar-btns">
+    <button type="button" class="ap-prev" id="ap-prev" hidden>もどる</button>
+    <button type="button" class="ap-next" id="ap-next" disabled>次へ</button>
+  </div>
+</div>
+
+<script src="data/apply-config.js"></script>
+<script src="assets/apply.js"></script>
+</body>
+</html>
