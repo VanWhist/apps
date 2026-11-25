@@ -28,10 +28,10 @@
   $('mode').title = A.DEMO ? '反映してもHPは変わりません' : '';
   $('page').innerHTML = PAGES.map(function (p) { return '<option value="' + p.file + '">' + p.label + '</option>'; }).join('');
   $('page').addEventListener('change', function () { S.page = this.value; S.sel = null; showForm(false); render(true); });
-  $('grip').addEventListener('click', function () {
-    var open = $('panel').classList.toggle('closed') === false;
-    this.setAttribute('aria-expanded', open);
-  });
+  $('grip').addEventListener('click', function () { setPanel($('panel').classList.contains('closed')); });
+  // スマホでは最初はパネルを畳んで、HPを広く見せる（文字をタップすると開く）
+  var NARROW = window.matchMedia('(max-width:860px)');
+  setPanel(!NARROW.matches);
   loadState();
 
   function loadState() {
@@ -249,6 +249,7 @@
     renderPending(); render(false);
   }
   function renderPending() {
+    gripLabel();
     if (!S.pending.length) {
       $('pending').innerHTML = '<p class="ed-hint">まだありません。HPのプレビューには、加えた変更がすぐ映ります。</p>';
       $('apply').disabled = true; $('clear').hidden = true; return;
@@ -304,7 +305,16 @@
   }
 
   // ---------- 小物 ----------
-  function openPanel() { $('panel').classList.remove('closed'); $('grip').setAttribute('aria-expanded', 'true'); }
+  function openPanel() { setPanel(true); }
+  function setPanel(open) {
+    $('panel').classList.toggle('closed', !open);
+    $('grip').setAttribute('aria-expanded', String(open));
+    gripLabel();
+  }
+  function gripLabel() {
+    var open = !$('panel').classList.contains('closed'), n = S.pending.length;
+    $('grip').textContent = open ? '▼ パネルを閉じてHPを見る' : '▲ 編集パネルを開く' + (n ? '（変更 ' + n + '件）' : '（直したい文字をタップ）');
+  }
   function msg(t, err) { $('msg').textContent = t || ''; $('msg').className = 'ed-msg' + (err ? ' err' : ''); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function nl(s) { return esc(s).replace(/\n/g, '<br>'); }

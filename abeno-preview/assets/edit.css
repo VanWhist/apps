@@ -2,6 +2,7 @@
 :root{--ink:#1d1f3f;--ink-2:#4a4d6e;--cream:#fffaf2;--line:#ece5d8;--sun:#ffc93c;--sun-d:#e8a900;--sun-soft:#fff3cc;--coral:#ff6b57;--coral-t:#b83a29;--teal:#16a89a;--teal-t:#0a6f63;--teal-soft:#e2f6f3}
 *{box-sizing:border-box}
 html,body{height:100%}
+body{height:100dvh}
 body{margin:0;display:flex;flex-direction:column;background:#e9e6df;color:var(--ink);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Meiryo",sans-serif;font-size:15px;line-height:1.6}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .ed-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 14px;background:var(--ink);color:#fff}
@@ -47,8 +48,9 @@ body{margin:0;display:flex;flex-direction:column;background:#e9e6df;color:var(--
 /* スマホ・タブレット縦：HPを全面に、パネルは下から出る */
 @media (max-width:860px){
   .ed-wrap{flex-direction:column}
-  .ed-site{padding:0}
-  .ed-site iframe{border-radius:0}
+  /* HPの枠は中でスクロール（iPhoneは枠の高さが中身に合わせて伸びるため、外側をスクロール箱にする）。下は畳んだパネルの分あける */
+  .ed-site{padding:0 0 52px;overflow:auto;-webkit-overflow-scrolling:touch}
+  .ed-site iframe{display:block;border-radius:0}
   .ed-panel{position:fixed;left:0;right:0;bottom:0;width:auto;max-height:62vh;border-left:0;border-top:2px solid var(--ink);border-radius:18px 18px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.18);padding-bottom:env(safe-area-inset-bottom)}
   .ed-grip{display:block;position:sticky;top:0;z-index:1;width:100%;padding:10px;border:0;background:var(--cream);font:700 14px/1 inherit;font-family:inherit;color:var(--ink);cursor:pointer}
   .ed-grip::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:#c9c4ba;margin:0 auto 6px}
