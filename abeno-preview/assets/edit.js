@@ -28,9 +28,37 @@
   $('mode').title = A.DEMO ? '反映してもHPは変わりません' : '';
   $('page').innerHTML = PAGES.map(function (p) { return '<option value="' + p.file + '">' + p.label + '</option>'; }).join('');
   $('page').addEventListener('change', function () { S.page = this.value; S.sel = null; showForm(false); render(true); });
-  $('grip').addEventListener('click', function () { setPanel($('panel').classList.contains('closed')); });
+  // スマホ：パネル上のバーをタップで開け閉め、上下に動かすとHPとパネルの広さを変えられる
+  var NARROW = window.matchMedia('(max-width:860px)'), lastH = 0, dragged = false;
+  (function () {
+    var g = $('grip'), panel = $('panel'), wrap = panel.parentNode, sy = 0, sh = 0, on = false;
+    function maxH() { return wrap.clientHeight - 60; }
+    g.addEventListener('pointerdown', function (e) {
+      if (!NARROW.matches) return;
+      on = true; dragged = false; sy = e.clientY; sh = panel.offsetHeight;
+      try { g.setPointerCapture(e.pointerId); } catch (x) {}
+    });
+    g.addEventListener('pointermove', function (e) {
+      if (!on) return;
+      var dy = sy - e.clientY;
+      if (!dragged && Math.abs(dy) < 6) return;
+      if (!dragged) { dragged = true; wrap.classList.add('dragging'); panel.classList.remove('closed'); }
+      e.preventDefault();
+      panel.style.height = Math.max(g.offsetHeight, Math.min(maxH(), sh + dy)) + 'px';
+    });
+    function end() {
+      if (!on) return; on = false; wrap.classList.remove('dragging');
+      if (!dragged) return;
+      var h = panel.offsetHeight;
+      if (h < g.offsetHeight + 50) setPanel(false); else { lastH = h; setPanel(true); }
+    }
+    g.addEventListener('pointerup', end); g.addEventListener('pointercancel', end);
+    g.addEventListener('click', function () {
+      if (dragged) { dragged = false; return; }
+      setPanel(panel.classList.contains('closed'));
+    });
+  })();
   // スマホでは最初はパネルを畳んで、HPを広く見せる（文字をタップすると開く）
-  var NARROW = window.matchMedia('(max-width:860px)');
   setPanel(!NARROW.matches);
   loadState();
 
@@ -305,15 +333,21 @@
   }
 
   // ---------- 小物 ----------
-  function openPanel() { setPanel(true); }
+  // 文字をタップしたときは、直す欄が見える広さ（画面の4割以上）で開く
+  function openPanel() {
+    setPanel(true);
+    var p = $('panel'), w = p.parentNode.clientHeight;
+    if (NARROW.matches && p.offsetHeight < w * 0.4) p.style.height = Math.round(w * 0.45) + 'px';
+  }
   function setPanel(open) {
     $('panel').classList.toggle('closed', !open);
+    if (open && NARROW.matches) $('panel').style.height = lastH ? Math.min(lastH, $('panel').parentNode.clientHeight - 60) + 'px' : '';
     $('grip').setAttribute('aria-expanded', String(open));
     gripLabel();
   }
   function gripLabel() {
     var open = !$('panel').classList.contains('closed'), n = S.pending.length;
-    $('grip').textContent = open ? '▼ パネルを閉じてHPを見る' : '▲ 編集パネルを開く' + (n ? '（変更 ' + n + '件）' : '（直したい文字をタップ）');
+    $('grip').textContent = open ? '▼ タップで閉じる（上下に動かすと広さが変わります）' : '▲ 編集パネルを開く' + (n ? '（変更 ' + n + '件）' : '（直したい文字をタップ）');
   }
   function msg(t, err) { $('msg').textContent = t || ''; $('msg').className = 'ed-msg' + (err ? ' err' : ''); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }

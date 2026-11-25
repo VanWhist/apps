@@ -45,15 +45,17 @@ body{margin:0;display:flex;flex-direction:column;background:#e9e6df;color:var(--
 .ed-msg.err{color:var(--coral-t)}
 .ed-msg:empty{display:none}
 
-/* スマホ・タブレット縦：HPを全面に、パネルは下から出る */
+/* スマホ・タブレット縦：上にHP、下に編集パネル。間のバーを上下に動かして広さを変える */
 @media (max-width:860px){
   .ed-wrap{flex-direction:column}
-  /* HPの枠は中でスクロール（iPhoneは枠の高さが中身に合わせて伸びるため、外側をスクロール箱にする）。下は畳んだパネルの分あける */
-  .ed-site{padding:0 0 52px;overflow:auto;-webkit-overflow-scrolling:touch}
+  /* HPの枠は中でスクロール（iPhoneは枠の高さが中身に合わせて伸びるため、外側をスクロール箱にする） */
+  .ed-site{flex:1;min-height:0;padding:0;overflow:auto;-webkit-overflow-scrolling:touch}
   .ed-site iframe{display:block;border-radius:0}
-  .ed-panel{position:fixed;left:0;right:0;bottom:0;width:auto;max-height:62vh;border-left:0;border-top:2px solid var(--ink);border-radius:18px 18px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.18);padding-bottom:env(safe-area-inset-bottom)}
-  .ed-grip{display:block;position:sticky;top:0;z-index:1;width:100%;padding:10px;border:0;background:var(--cream);font:700 14px/1 inherit;font-family:inherit;color:var(--ink);cursor:pointer}
-  .ed-grip::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:#c9c4ba;margin:0 auto 6px}
-  .ed-panel.closed{max-height:52px;overflow:hidden}
+  .ed-panel{flex:none;width:auto;height:55%;display:flex;flex-direction:column;overflow:hidden;border-left:0;border-top:2px solid var(--ink);border-radius:18px 18px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.18)}
+  .ed-panel-in{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(30px + env(safe-area-inset-bottom))}
+  .ed-grip{display:block;flex:none;width:100%;padding:10px 10px calc(10px + env(safe-area-inset-bottom) * var(--closed,0));border:0;background:var(--cream);font:700 14px/1 inherit;font-family:inherit;color:var(--ink);cursor:ns-resize;touch-action:none;-webkit-user-select:none;user-select:none}
+  .ed-grip::before{content:"";display:block;width:48px;height:5px;border-radius:3px;background:#a9a399;margin:0 auto 7px}
+  .ed-panel.closed{height:auto!important;--closed:1}
   .ed-panel.closed .ed-panel-in{display:none}
+  .ed-wrap.dragging iframe{pointer-events:none}
 }
