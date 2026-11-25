@@ -96,6 +96,8 @@
   function renderHome() {
     $('me-name').textContent = S.me.name;
     $('areas').innerHTML = S.me.areas.map(function (a) {
+      // 写真は会話では変えられないので、編集モードへ案内する
+      if ((window.StaffCore.areaById(a.id) || {}).photoOnly) return '<a class="st-area" href="edit.html"><b>' + esc(a.label) + '</b><small>HP編集モードで、写真をタップして差し替えます</small><span aria-hidden="true">›</span></a>';
       return '<button type="button" class="st-area" data-id="' + a.id + '"><b>' + esc(a.label) + '</b><small>' + esc(a.hint) + '</small><span aria-hidden="true">›</span></button>';
     }).join('') || '<p class="st-note">担当の項目がまだありません。管理者に連絡してください。</p>';
     $('recent').innerHTML = S.recent.length ? S.recent.map(function (r) {

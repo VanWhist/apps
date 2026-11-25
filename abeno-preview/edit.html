@@ -8,7 +8,7 @@
 <!-- スタッフ専用。検索エンジンに載せない（公開後も消さない） -->
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='11' r='6' fill='%23ff6b57'/%3E%3Cpath d='M4 30 Q20 40 36 30' stroke='%231d1f3f' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="assets/edit.css?v=20261125b">
+<link rel="stylesheet" href="assets/edit.css?v=20261125c">
 </head>
 <body>
 <header class="ed-bar">
@@ -32,8 +32,8 @@
 
       <!-- 選んだ文字を直す -->
       <section class="ed-box" id="box-edit">
-        <h2>1. 直したい文字をクリック</h2>
-        <p class="ed-hint" id="edit-hint">HPの中で、点線の枠が出る文字をクリック（スマホはタップ）すると、ここで直せます。枠が出ない所（住所・ボタンなど）はこの画面では直せません。</p>
+        <h2>1. 直したい文字・写真をクリック</h2>
+        <p class="ed-hint" id="edit-hint">HPの中で、点線の枠が出る文字や写真をクリック（スマホはタップ）すると、ここで直せます。写真がない所には「📷 写真を入れる」の枠が出ます。枠が出ない所（住所・ボタンなど）はこの画面では直せません。</p>
         <div id="edit-form" hidden>
           <p class="ed-where" id="edit-where"></p>
           <div id="edit-choose" class="ed-choose" hidden></div>
@@ -42,6 +42,24 @@
           <div class="ed-btns">
             <button type="button" class="ed-btn main" id="edit-add">この変更を加える</button>
             <button type="button" class="ed-btn" id="edit-cancel">やめる</button>
+          </div>
+        </div>
+        <!-- 写真を差し替える -->
+        <div id="photo-form" hidden>
+          <p class="ed-where" id="photo-where"></p>
+          <div class="ed-ph">
+            <figure><figcaption>いま</figcaption><img id="photo-now" alt=""><span id="photo-none">写真なし</span></figure>
+            <figure><figcaption>新しい写真</figcaption><img id="photo-new" alt="" hidden><span id="photo-nonew">まだ選んでいません</span></figure>
+          </div>
+          <label class="ed-btn ed-file">📷 写真を選ぶ<input type="file" id="photo-file" accept="image/jpeg,image/png,image/heic,image/heif,image/webp,image/*"></label>
+          <p class="ed-hint" id="photo-info">スマホの写真から選べます。自動で小さくし、撮影場所などの情報は消してから保存します。</p>
+          <label class="ed-lbl" for="photo-alt">写真の説明（目の見えない方の読み上げ用。例：キッズクラスの練習の様子）</label>
+          <input type="text" id="photo-alt" maxlength="120">
+          <label class="ed-check"><input type="checkbox" id="photo-ok"> 写っている方（お子さんは保護者）から、HPに載せる同意をもらっています</label>
+          <div class="ed-btns">
+            <button type="button" class="ed-btn main" id="photo-add" disabled>この写真にする</button>
+            <button type="button" class="ed-btn" id="photo-remove" hidden>写真を外す</button>
+            <button type="button" class="ed-btn" id="photo-cancel">やめる</button>
           </div>
         </div>
       </section>
@@ -73,10 +91,10 @@
   </aside>
 </div>
 
-<script src="data/staff-config.js"></script>
-<script src="data/site-data.js"></script>
-<script src="assets/staff-core.js"></script>
-<script src="assets/staff-api.js"></script>
-<script src="assets/edit.js?v=20261125b"></script>
+<script src="data/staff-config.js?v=20261125c"></script>
+<script src="data/site-data.js?v=20261125c"></script>
+<script src="assets/staff-core.js?v=20261125c"></script>
+<script src="assets/staff-api.js?v=20261125c"></script>
+<script src="assets/edit.js?v=20261125c"></script>
 </body>
 </html>

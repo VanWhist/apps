@@ -45,6 +45,20 @@ body{margin:0;display:flex;flex-direction:column;background:#e9e6df;color:var(--
 .ed-msg.err{color:var(--coral-t)}
 .ed-msg:empty{display:none}
 
+/* 写真 */
+.ed-ph{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}
+.ed-ph figure{margin:0;background:#f3efe7;border-radius:10px;padding:6px;min-height:90px;text-align:center;font-size:12px;color:var(--ink-2)}
+.ed-ph figcaption{font-size:11px;font-weight:700;margin:0 0 4px}
+.ed-ph img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px}
+.ed-ph figure:last-child{background:var(--sun-soft);border:1px solid var(--sun-d)}
+.ed-file{display:flex;align-items:center;justify-content:center;width:100%;margin:0 0 6px;background:var(--teal-soft);border-color:var(--teal);color:var(--teal-t);position:relative;overflow:hidden}
+.ed-file input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.ed-lbl{display:block;font-size:12.5px;font-weight:700;margin:4px 0 4px}
+.ed-box input[type=text]{width:100%;font:16px/1.5 inherit;font-family:inherit;color:var(--ink);background:var(--cream);border:2px solid var(--line);border-radius:12px;padding:8px 10px;margin:0 0 8px}
+.ed-check{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;font-weight:700;margin:0 0 10px;padding:8px 10px;border-radius:10px;background:#fff1ee;border:1px solid #ffc9c0}
+.ed-check input{width:22px;height:22px;flex:none;margin:0}
+.ed-ba img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;margin:2px 0 0}
+
 /* スマホ・タブレット縦：上にHP、下に編集パネル。間のバーを上下に動かして広さを変える */
 @media (max-width:860px){
   .ed-wrap{flex-direction:column}

@@ -15,12 +15,12 @@
     { file: 'adult.html', label: '大人のクラス' }, { file: 'club.html', label: 'クラブ案内' }
   ];
   // 画面に出ても、クリックで直さない項目（リンクや記号）
-  var SKIP_KEYS = { url: 1, youtube: 1, id: 1, classId: 1, date: 1, source: 1, tag: 1, account: 1, widgetUrl: 1, feedUrl: 1, day: 1 };
+  var SKIP_KEYS = { url: 1, youtube: 1, id: 1, classId: 1, date: 1, source: 1, tag: 1, account: 1, widgetUrl: 1, feedUrl: 1, day: 1, src: 1, alt: 1 };
 
   // 名前が「しくみ」になっている所（スケジュールのクラス名の並び）は直さない
   var SKIP_PATH = /^schedule\/rows\//;
 
-  var S = { me: null, allowed: [], roots: [], base: null, sha: '', pending: [], page: 'index.html', sel: null, html: {}, busy: false, index: {} };
+  var S = { v: Date.now().toString(36), files: {}, photo: null, me: null, allowed: [], roots: [], base: null, sha: '', pending: [], page: 'index.html', sel: null, html: {}, busy: false, index: {} };
 
   // ---------- 起動 ----------
   if (!A.loggedIn()) { location.replace('staff.html?next=edit'); return; }
@@ -74,7 +74,7 @@
       Object.keys(res.data || {}).forEach(function (id) { var d = res.data[id]; Object.keys(d).forEach(function (k) { base[k] = d[k]; }); });
       S.base = base;
       $('who').textContent = res.me.name + ' さん（直せる項目：' + res.me.areas.map(function (a) { return a.label.replace(/（.*）/, ''); }).join('・') + '）';
-      $('ai-area').innerHTML = res.me.areas.map(function (a) { return '<option value="' + a.id + '">' + a.label + '</option>'; }).join('');
+      $('ai-area').innerHTML = res.me.areas.filter(function (a) { return !(Core.areaById(a.id) || {}).photoOnly; }).map(function (a) { return '<option value="' + a.id + '">' + a.label + '</option>'; }).join('');
       renderExamples();
       render(false);
     });
@@ -99,11 +99,12 @@
     $('loading').hidden = false;
     getHtml(S.page).then(function (html) {
       var data = previewData();
-      window.__abenoEditData = data;
+      window.__abenoEditData = withFiles(data);
       S.index = buildIndex(data);
       var baseHref = location.href.replace(/[^\/]*([?#].*)?$/, '');
       html = html
-        .replace(/<script src="data\/site-data\.js"><\/script>/, '<script>window.SITE_DATA = parent.__abenoEditData;<\/script>')
+        .replace(/<script src="data\/site-data\.js"><\/script>/, '<script>window.SITE_DATA = parent.__abenoEditData; window.SITE_EDIT = true;<\/script>')
+        .replace(/(assets\/(?:app\.js|style\.css))"/g, '$1?v=' + S.v + '"') // 古い表示が残らないように
         .replace(/<head>/i, '<head><base href="' + baseHref + '"><style>' + FRAME_CSS + '</style>');
       frame.onload = function () {
         $('loading').hidden = true;
@@ -120,7 +121,20 @@
   var FRAME_CSS = '[data-ed]{outline:2px dashed rgba(255,107,87,.55);outline-offset:2px;cursor:pointer;border-radius:4px}' +
     '[data-ed]:hover{outline-color:#ff6b57;background:rgba(255,201,60,.25)}' +
     '[data-ed].ed-on{outline:3px solid #ff6b57;background:rgba(255,201,60,.35)}' +
+    '[data-photo]{outline:3px dashed rgba(22,168,154,.8);outline-offset:-3px;cursor:pointer}' +
+    '[data-photo].ed-on{outline:4px solid #16a89a}' +
     '.hd{position:static!important}';
+  // まだ保存していない写真は、HPのプレビューでは手元の画像（data:）で見せる
+  function photoUrl(src) { return S.files[src] || (A.demoFile && A.demoFile(src)) || src; }
+  function withFiles(data) {
+    var c = JSON.parse(JSON.stringify(data));
+    (function walk(o) {
+      if (!o || typeof o !== 'object') return;
+      if (typeof o.src === 'string' && o.src) o.src = photoUrl(o.src);
+      Object.keys(o).forEach(function (k) { walk(o[k]); });
+    })(c);
+    return c;
+  }
 
   // データの文字 → 場所（path）の一覧
   function norm(s) { return String(s).replace(/\s+/g, ' ').trim(); }
@@ -212,6 +226,8 @@
   // ---------- クリック ----------
   function onFrameClick(e) {
     var t = e.target;
+    var ph = t.closest && t.closest('[data-photo]');
+    if (ph) { e.preventDefault(); e.stopPropagation(); selectPhoto(ph); return; }
     var ed = t.closest && t.closest('[data-ed]');
     var link = t.closest && t.closest('a[href]');
     if (ed) {
@@ -253,7 +269,86 @@
     $('edit-text').rows = Math.min(10, Math.max(2, Math.ceil(String(v || '').length / 22)));
     $('edit-text').focus();
   }
-  function showForm(on) { $('edit-form').hidden = !on; $('edit-hint').hidden = on; }
+  function showForm(on) { $('edit-form').hidden = !on; $('photo-form').hidden = true; $('edit-hint').hidden = on; }
+
+  // ---------- 写真 ----------
+  function getAt(data, path) { return path.split('/').reduce(function (o, k) { return o == null ? undefined : o[k]; }, data); }
+  function selectPhoto(el) {
+    var doc = el.ownerDocument;
+    doc.querySelectorAll('.ed-on').forEach(function (x) { x.classList.remove('ed-on'); });
+    el.classList.add('ed-on');
+    var path = el.getAttribute('data-photo');
+    openPanel();
+    $('edit-form').hidden = true; $('edit-hint').hidden = true; $('photo-form').hidden = false;
+    $('photo-where').textContent = Core.describe(previewData(), path);
+    if (S.roots.indexOf(path.split('/')[0]) < 0) {
+      $('photo-where').textContent += '（担当の項目ではないため、変えられません）';
+      S.photo = null; $('photo-add').disabled = true; return;
+    }
+    var cur = getAt(previewData(), path) || {};
+    S.photo = { path: path, src: cur.src || '', dataUrl: '' };
+    $('photo-now').hidden = !cur.src; $('photo-none').hidden = !!cur.src;
+    if (cur.src) $('photo-now').src = photoUrl(cur.src);
+    $('photo-new').hidden = true; $('photo-nonew').hidden = false; $('photo-file').value = '';
+    $('photo-alt').value = cur.alt || ''; $('photo-ok').checked = false;
+    $('photo-remove').hidden = !cur.src;
+    $('photo-info').textContent = 'スマホの写真から選べます。自動で小さくし、撮影場所などの情報は消してから保存します。';
+    photoButtons();
+  }
+  function photoButtons() {
+    var P = S.photo;
+    $('photo-add').disabled = !P || (P.dataUrl ? !$('photo-ok').checked : !(P.src && $('photo-alt').value !== (getAt(previewData(), P.path) || {}).alt));
+    $('photo-add').textContent = P && !P.dataUrl && P.src ? '説明だけ直す' : 'この写真にする';
+  }
+  $('photo-ok').addEventListener('change', photoButtons);
+  $('photo-alt').addEventListener('input', photoButtons);
+  $('photo-file').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    if (!f || !S.photo) return;
+    $('photo-info').textContent = '写真を小さくしています…';
+    shrink(f).then(function (r) {
+      S.photo.dataUrl = r.dataUrl;
+      $('photo-new').src = r.dataUrl; $('photo-new').hidden = false; $('photo-nonew').hidden = true;
+      $('photo-info').textContent = '小さくしました（' + r.w + '×' + r.h + '・約' + Math.round(r.bytes / 1024) + 'KB）。' + ($('photo-ok').checked ? '' : '下の同意にチェックを入れてください。');
+      photoButtons();
+    }).catch(function (e) { $('photo-info').textContent = e.message; });
+  });
+  // 長い辺 1600px の JPEG に。描き直すので、撮影場所などの情報（Exif）は残らない
+  function shrink(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var w = img.naturalWidth, h = img.naturalHeight, r = Math.min(1, 1600 / Math.max(w, h));
+        var cw = Math.round(w * r), ch = Math.round(h * r);
+        var c = document.createElement('canvas'); c.width = cw; c.height = ch;
+        var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cw, ch); g.drawImage(img, 0, 0, cw, ch);
+        URL.revokeObjectURL(url);
+        var q = 0.82, d = c.toDataURL('image/jpeg', q);
+        while (d.length * 0.75 > 700000 && q > 0.5) { q -= 0.1; d = c.toDataURL('image/jpeg', q); }
+        if (d.indexOf('data:image/jpeg;base64,') !== 0) return reject(new Error('この写真は使えませんでした。別の写真でお試しください。'));
+        resolve({ dataUrl: d, w: cw, h: ch, bytes: Math.round((d.length - 23) * 0.75) });
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('この写真は読み込めませんでした。別の写真でお試しください。')); };
+      img.src = url;
+    });
+  }
+  function newPhotoName() {
+    var t = new Date(Date.now() + 9 * 3600e3).toISOString().replace(/[-:T]/g, '').slice(0, 14);
+    return 'images/' + t.slice(0, 8) + '-' + t.slice(8) + '-' + Math.random().toString(36).slice(2, 6) + '.jpg';
+  }
+  $('photo-add').addEventListener('click', function () {
+    var P = S.photo; if (!P) return;
+    var src = P.src;
+    if (P.dataUrl) { src = newPhotoName(); S.files[src] = P.dataUrl; }
+    addChanges([{ op: 'set', path: P.path, value_json: JSON.stringify({ src: src, alt: $('photo-alt').value.trim() }), summary: P.dataUrl ? '写真を差し替え' : '写真の説明' }]);
+    S.photo = null; showForm(false); unmarkOn();
+  });
+  $('photo-remove').addEventListener('click', function () {
+    var P = S.photo; if (!P) return;
+    addChanges([{ op: 'set', path: P.path, value_json: JSON.stringify({ src: '', alt: '' }), summary: '写真を外す' }]);
+    S.photo = null; showForm(false); unmarkOn();
+  });
+  $('photo-cancel').addEventListener('click', function () { S.photo = null; showForm(false); unmarkOn(); });
   $('edit-cancel').addEventListener('click', function () { S.sel = null; showForm(false); unmarkOn(); });
   function unmarkOn() { try { $('site').contentDocument.querySelectorAll('.ed-on').forEach(function (x) { x.classList.remove('ed-on'); }); } catch (e) { /* なし */ } }
   $('edit-add').addEventListener('click', function () {
@@ -284,6 +379,13 @@
     }
     var rows = Core.applyChanges(S.base, S.pending, S.allowed, '*').rows;
     $('pending').innerHTML = rows.map(function (r, i) {
+      if (Core.isPhotoPath(r.path) && S.pending[i].op === 'set') {
+        var b = getAt(S.base, r.path) || {}, a = {};
+        try { a = JSON.parse(S.pending[i].value_json) || {}; } catch (e) { a = {}; }
+        var th = function (p) { return p && p.src ? '<img src="' + esc(photoUrl(p.src)) + '" alt="">' + (p.alt ? esc(p.alt) : '') : '（写真なし）'; };
+        return '<div class="ed-row"><p class="ed-where">' + esc(r.where) + '<button type="button" class="ed-x" data-del="' + i + '" aria-label="この変更をやめる">×</button></p>' +
+          '<div class="ed-ba"><div class="b"><span>いま</span>' + th(b) + '</div><div class="a"><span>変更後</span>' + th(a) + '</div></div></div>';
+      }
       return '<div class="ed-row"><p class="ed-where">' + esc(r.where) + '<button type="button" class="ed-x" data-del="' + i + '" aria-label="この変更をやめる">×</button></p>' +
         '<div class="ed-ba"><div class="b"><span>いま</span>' + nl(r.before) + '</div><div class="a"><span>変更後</span>' + nl(r.after) + '</div></div></div>';
     }).join('');
@@ -302,7 +404,10 @@
   $('apply').addEventListener('click', function () {
     if (S.busy || !S.pending.length) return;
     S.busy = true; this.disabled = true; msg('反映しています…');
-    A.call('apply', { area: '*', changes: S.pending, sha: S.sha }).then(function (res) {
+    // 新しい写真のファイルも一緒に送る（変更の中で使っているものだけ）
+    var files = Core.photoSrcs(S.pending).filter(function (src) { return S.files[src]; })
+      .map(function (src) { return { path: src, b64: S.files[src].split(',')[1] }; });
+    A.call('apply', { area: '*', changes: S.pending, sha: S.sha, files: files, consent: files.length > 0 }).then(function (res) {
       S.busy = false;
       if (!res.ok) { msg(res.message, true); $('apply').disabled = false; return; }
       S.pending = [];
@@ -338,6 +443,8 @@
     setPanel(true);
     var p = $('panel'), w = p.parentNode.clientHeight;
     if (NARROW.matches && p.offsetHeight < w * 0.4) p.style.height = Math.round(w * 0.45) + 'px';
+    // パネルが開いて狭くなっても、選んだ所が見えるように
+    if (NARROW.matches) setTimeout(function () { try { var on = $('site').contentDocument.querySelector('.ed-on'); if (on) on.scrollIntoView({ block: 'center' }); } catch (e) { /* なし */ } }, 60);
   }
   function setPanel(open) {
     $('panel').classList.toggle('closed', !open);
@@ -347,7 +454,7 @@
   }
   function gripLabel() {
     var open = !$('panel').classList.contains('closed'), n = S.pending.length;
-    $('grip').textContent = open ? '▼ タップで閉じる（上下に動かすと広さが変わります）' : '▲ 編集パネルを開く' + (n ? '（変更 ' + n + '件）' : '（直したい文字をタップ）');
+    $('grip').textContent = open ? '▼ タップで閉じる（上下に動かすと広さが変わります）' : '▲ 編集パネルを開く' + (n ? '（変更 ' + n + '件）' : '（直したい文字・写真をタップ）');
   }
   function msg(t, err) { $('msg').textContent = t || ''; $('msg').className = 'ed-msg' + (err ? ' err' : ''); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }

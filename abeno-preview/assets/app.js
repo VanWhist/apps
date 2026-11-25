@@ -14,6 +14,13 @@
     return path.split('.').reduce(function (o, k) { return o ? o[k] : undefined; }, D);
   }
   // 日付は '2026-11-04' の文字のまま扱う（new Date('...') は端末の時差で1日ずれるため使わない）
+  // 写真。編集モード（スタッフ用）では、写真がない所に「写真を入れる」枠を出す
+  var EDIT = !!window.SITE_EDIT;
+  function photoHTML(p, path, cls) {
+    if (p && p.src) return '<img class="photo ' + cls + '" src="' + esc(p.src) + '" alt="' + esc(p.alt || '') + '" loading="lazy" data-photo="' + path + '">';
+    if (EDIT) return '<div class="photo-add ' + cls + '" data-photo="' + path + '">📷 写真を入れる</div>';
+    return '';
+  }
   function ymd(iso) { var p = String(iso).split('-'); return [+p[0], +p[1], +p[2]]; }
   function fmtDate(iso) {
     var d = ymd(iso);
@@ -88,11 +95,12 @@
       }).join('');
     },
     classes: function () {
-      return (D.classes || []).map(function (c) {
+      return (D.classes || []).map(function (c, ci) {
         var times = (c.times || []).map(function (t) {
           return '<li>' + (t.day ? '<b class="day">' + esc(t.day) + '</b>' : '') + '<span>' + esc(t.time) + '</span></li>';
         }).join('');
         return '<article class="cls' + (c.featured ? ' featured' : '') + '" id="c-' + esc(c.id) + '">' +
+          photoHTML(c.photo, 'classes/' + ci + '/photo', 'cls-photo') +
           '<p class="cls-label">' + esc(c.label) + '</p>' +
           '<h3>' + esc(c.name) + '</h3>' +
           (c.age ? '<p class="cls-age">対象：' + esc(c.age) + (c.ageTmp ? TMP : '') + '</p>' : '') +
@@ -299,7 +307,8 @@
     news: function () {
       return sortedNews().map(function (n) {
         return '<li id="' + newsId(n) + '"><time datetime="' + esc(n.date) + '">' + fmtDate(n.date) + '</time><span class="tag">' + esc(n.tag) + '</span>' +
-          (n.body ? '<details><summary>' + esc(n.title) + '</summary><p class="news-body">' + esc(n.body) + '</p></details>' : '<p>' + esc(n.title) + '</p>') + '</li>';
+          (n.body ? '<details><summary>' + esc(n.title) + '</summary>' + photoHTML(n.photo, 'news/' + D.news.indexOf(n) + '/photo', 'news-photo') + '<p class="news-body">' + esc(n.body) + '</p></details>'
+            : '<p>' + esc(n.title) + '</p>' + photoHTML(n.photo, 'news/' + D.news.indexOf(n) + '/photo', 'news-photo')) + '</li>';
       }).join('');
     },
     sns: function () {
@@ -308,6 +317,15 @@
       }).join('');
     }
   };
+
+  // 写真の枠（トップ・クラブ案内）。写真がなければ、いまの仮の絵のまま（公開HPでは何も出さない）
+  document.querySelectorAll('[data-photo-slot]').forEach(function (el) {
+    var path = el.getAttribute('data-photo-slot');
+    var p = path.split('/').reduce(function (o, k) { return o == null ? undefined : o[k]; }, D);
+    var ph = el.querySelector('.ph');
+    if (p && p.src) { if (ph) ph.outerHTML = photoHTML(p, path, 'slot-img'); else el.innerHTML = photoHTML(p, path, 'about-img'); }
+    else if (EDIT) { if (ph) ph.setAttribute('data-photo', path); else el.innerHTML = photoHTML(p, path, 'about-img'); }
+  });
 
   document.querySelectorAll('[data-render]').forEach(function (el) {
     var fn = R[el.getAttribute('data-render')];

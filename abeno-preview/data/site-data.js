@@ -33,6 +33,16 @@ window.SITE_DATA = {
     ],
     "foundedISO": "2001-04-01"
   },
+  "photos": {
+    "top": {
+      "src": "",
+      "alt": ""
+    },
+    "club": {
+      "src": "",
+      "alt": ""
+    }
+  },
   "flash": {
     "label": "速報",
     "lines": [

@@ -31,8 +31,11 @@ var StaffAPI = (function () {
   var demo = (function () {
     var saved = null;
     try { saved = JSON.parse(ss(DEMO_KEY) || 'null'); } catch (e) { saved = null; }
-    return saved || { data: JSON.parse(JSON.stringify(window.SITE_DATA || {})), sha: 1, undo: {}, recent: [], email: '' };
+    var fresh = JSON.parse(JSON.stringify(window.SITE_DATA || {}));
+    if (saved) Object.keys(fresh).forEach(function (k) { if (!(k in saved.data)) saved.data[k] = fresh[k]; }); // あとから増えた項目（写真など）
+    return saved || { data: fresh, sha: 1, undo: {}, recent: [], email: '', files: {} };
   })();
+  demo.files = demo.files || {};
   function saveDemo() { ss(DEMO_KEY, JSON.stringify(demo)); }
   function demoStaff(email) { for (var i = 0; i < DEMO_STAFF.length; i++) if (DEMO_STAFF[i].email === email) return DEMO_STAFF[i]; return null; }
   function demoPublic(s) { return { name: s.name, admin: !!s.admin, areas: s.areas.map(function (id) { var a = Core.areaById(id); return { id: a.id, label: a.label, hint: a.hint }; }) }; }
@@ -69,6 +72,11 @@ var StaffAPI = (function () {
       try {
         var before = JSON.stringify(demo.data);
         var a = Core.applyChanges(demo.data, p.changes, me.areas, p.area);
+        // 写真ファイル：本番は GitHub の images へ。確認モードはこのタブの中にだけ置く
+        var wanted = Core.photoSrcs(p.changes), files = p.files || [];
+        for (var fi = 0; fi < files.length; fi++) { var fm = Core.checkPhotoFile(files[fi], wanted); if (fm) return { ok: false, message: fm }; }
+        if (files.length && !p.consent) return { ok: false, message: '写真の掲載同意のチェックがありません' };
+        files.forEach(function (f) { demo.files[f.path] = 'data:image/jpeg;base64,' + f.b64; });
         demo.data = a.data; demo.sha++;
         var commit = 'demo' + demo.sha;
         var labels = [];
@@ -114,6 +122,7 @@ var StaffAPI = (function () {
   function loggedIn() { return DEMO ? !!demoStaff(demo.email) : !!ss(TOKEN_KEY); }
   function logout() { var r = call('logout'); ss(TOKEN_KEY, null); return r; }
   // 確認モードで、反映済みの見本データ全体（編集モードの表示用）
+  function demoFile(src) { return DEMO ? demo.files[src] || '' : ''; }
   function demoSiteData() { return DEMO ? JSON.parse(JSON.stringify(demo.data)) : null; }
 
   var Mock = (function () {
@@ -203,5 +212,5 @@ var StaffAPI = (function () {
     };
   })();
 
-  return { DEMO: DEMO, siteUrl: C.siteUrl || 'index.html', DEMO_STAFF: DEMO_STAFF, call: call, loggedIn: loggedIn, logout: logout, demoSiteData: demoSiteData, Mock: Mock };
+  return { DEMO: DEMO, siteUrl: C.siteUrl || 'index.html', DEMO_STAFF: DEMO_STAFF, call: call, loggedIn: loggedIn, logout: logout, demoSiteData: demoSiteData, demoFile: demoFile, Mock: Mock };
 })();
