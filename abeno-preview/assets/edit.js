@@ -87,6 +87,9 @@
     return A.call('state').then(function (res) {
       if (!res.ok) { if (res.relogin) location.replace('staff.html?next=edit'); else msg(res.message, true); return; }
       S.me = res.me; S.sha = res.sha;
+      // AIに改修を頼むのは管理者だけ
+      $('menu-dev').hidden = !res.me.admin;
+      if (res.me.admin && !$('page').querySelector('option[value="#dev"]')) $('page').insertAdjacentHTML('beforeend', '<option value="#dev">AIに改修を頼む</option>');
       S.allowed = res.me.areas.map(function (a) { return a.id; });
       S.roots = [];
       S.allowed.forEach(function (id) { S.roots = S.roots.concat(Core.areaById(id).roots); });
@@ -483,10 +486,8 @@
     if (name === 'post-new') { openPost(-1); name = 'post'; }
     S.view = name;
     $('view-page').hidden = name !== 'page';
-    $('view-posts').hidden = name !== 'posts';
-    $('view-post').hidden = name !== 'post';
-    $('view-req').hidden = name !== 'req';
-    $('page').value = name === 'page' ? S.page : (name === 'req' ? '#req' : '#posts');
+    document.querySelectorAll('.ed-main > .ed-view').forEach(function (v) { v.hidden = v.id !== 'view-' + name; });
+    $('page').value = name === 'page' ? S.page : (name === 'req' ? '#req' : name === 'dev' || name === 'try' ? '#dev' : '#posts');
     document.querySelectorAll('.ed-menu .ed-mi').forEach(function (b) {
       var on = name === 'page' ? b.getAttribute('data-page') === S.page : b.getAttribute('data-view') === name || (name === 'post' && S.post < 0 && b.getAttribute('data-view') === 'post-new');
       b.classList.toggle('on', !!on);
@@ -494,7 +495,11 @@
     if (name === 'posts') renderPosts();
     if (name === 'page' && !noRender && !$('site').srcdoc) render(true);
     if (name === 'page') applyPreview();
+    document.body.classList.toggle('ed-nopanel', name === 'dev' || name === 'try');
+    document.dispatchEvent(new CustomEvent('abeno:view', { detail: name })); // AI改修（edit-dev.js）が受け取る
   }
+  window.__abenoShowView = showView;
+  window.__abenoPages = PAGES;
   function applyPreview() {
     try { $('site').contentDocument.body.classList.toggle('ed-pv', S.preview); } catch (e) { /* 読み込み中 */ }
     $('panel').style.visibility = S.preview && !NARROW.matches ? 'hidden' : '';

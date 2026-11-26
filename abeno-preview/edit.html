@@ -8,7 +8,7 @@
 <!-- スタッフ専用。検索エンジンに載せない（公開後も消さない） -->
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='11' r='6' fill='%23ff6b57'/%3E%3Cpath d='M4 30 Q20 40 36 30' stroke='%231d1f3f' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="assets/edit.css?v=20261126b">
+<link rel="stylesheet" href="assets/edit.css?v=20261126c">
 </head>
 <body>
 <!-- WordPress の管理画面に似せた形：上に管理バー、左にメニュー、真ん中でHPを直接編集、右に設定パネル -->
@@ -34,6 +34,7 @@
     <button type="button" class="ed-mi" data-view="post-new">新規追加</button>
     <p class="ed-menu-h">そのほか</p>
     <button type="button" class="ed-mi" data-tab="ai">AIに頼む</button>
+    <button type="button" class="ed-mi" data-view="dev" id="menu-dev" hidden>AIに改修を頼む</button>
     <button type="button" class="ed-mi" data-view="req">この画面への要望</button>
     <a class="ed-mi" href="staff.html">スマホ用の更新ページ</a>
   </nav>
@@ -82,6 +83,41 @@
         <div class="ed-btns"><button type="button" class="ed-wpbtn" id="req-send">要望を送る</button></div>
         <p class="ed-msg" id="req-msg" role="status"></p>
       </div>
+    </section>
+
+    <!-- AIに改修を頼む（HPや編集画面の作りそのものを直す。管理者だけ） -->
+    <section class="ed-view" id="view-dev" hidden>
+      <div class="ed-view-h"><h1>AIに改修を頼む</h1><span class="dv-usage" id="dv-usage"></span></div>
+      <div class="ed-post">
+        <p class="ed-hint">HPや、この編集画面の<strong>作り</strong>を変えたいときに使います（見た目・並び・ボタン・新しいコーナーなど）。AIが別の場所で作業し、終わったら<strong>試し表示</strong>で確かめてから<strong>反映</strong>します。反映の前に自動でバックアップを取るので、いつでも元に戻せます。</p>
+        <label class="sr" for="dv-text">頼みたいこと</label>
+        <textarea id="dv-text" rows="5" maxlength="4000" placeholder="例：トップの「体験に申し込む」ボタンをもっと大きく、オレンジ色にしてほしい"></textarea>
+        <div class="ed-btns"><button type="button" class="ed-wpbtn" id="dv-send">AIに頼む</button></div>
+        <p class="ed-msg" id="dv-msg" role="status"></p>
+        <p class="ed-hint dv-note">ログイン・バックアップ・元に戻す部分は、AIは変えられません。1回の依頼は10ドルまでで止まります。</p>
+      </div>
+      <h2 class="dv-h">これまでの依頼</h2>
+      <div id="dv-jobs" class="dv-jobs"></div>
+    </section>
+
+    <!-- 試し表示（AIが直した版。まだHPには出ていない） -->
+    <section class="ed-view dv-try" id="view-try" hidden>
+      <div class="dv-try-bar">
+        <button type="button" class="ed-wpbtn ghost" data-view="dev">← 戻る</button>
+        <strong>試し表示</strong>
+        <label class="sr" for="dv-page">ページ</label>
+        <select id="dv-page"></select>
+        <span class="ed-bar-sp"></span>
+        <button type="button" class="ed-wpbtn ghost" id="dv-more">もっとこうして</button>
+        <button type="button" class="ed-wpbtn" id="dv-apply">反映する</button>
+      </div>
+      <p class="dv-try-sum" id="dv-sum"></p>
+      <div class="dv-more" id="dv-more-box" hidden>
+        <label class="sr" for="dv-more-text">追加の注文</label>
+        <textarea id="dv-more-text" rows="3" maxlength="4000" placeholder="例：ボタンの色はもう少し薄く"></textarea>
+        <div class="ed-btns"><button type="button" class="ed-wpbtn" id="dv-more-send">この内容で直してもらう</button></div>
+      </div>
+      <div class="ed-site"><iframe id="dv-frame" title="AIが直した版の試し表示"></iframe></div>
     </section>
   </main>
 
@@ -156,10 +192,11 @@
   </aside>
 </div>
 
-<script src="data/staff-config.js?v=20261126b"></script>
-<script src="data/site-data.js?v=20261126b"></script>
-<script src="assets/staff-core.js?v=20261126b"></script>
-<script src="assets/staff-api.js?v=20261126b"></script>
-<script src="assets/edit.js?v=20261126b"></script>
+<script src="data/staff-config.js?v=20261126c"></script>
+<script src="data/site-data.js?v=20261126c"></script>
+<script src="assets/staff-core.js?v=20261126c"></script>
+<script src="assets/staff-api.js?v=20261126c"></script>
+<script src="assets/edit.js?v=20261126c"></script>
+<script src="assets/edit-dev.js?v=20261126c"></script>
 </body>
 </html>

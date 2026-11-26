@@ -11,6 +11,12 @@ var StaffAPI = (function () {
   'use strict';
   var C = window.STAFF_CONFIG || {};
   var API = String(C.api || '').trim();
+  // 本物につないだあとでも、URL に ?demo=1 を付けると確認モードで試せる（このタブのあいだだけ。?demo=0 で戻る）
+  try {
+    var dm = /[?&]demo=([01])/.exec(location.search);
+    if (dm) { if (dm[1] === '1') sessionStorage.setItem('abeno-demo-mode', '1'); else sessionStorage.removeItem('abeno-demo-mode'); }
+    if (sessionStorage.getItem('abeno-demo-mode') === '1') API = '';
+  } catch (e) { /* 保存できなければ、いつもどおり */ }
   var DEMO = !API;
   var Core = window.StaffCore;
   var TOKEN_KEY = 'abeno-staff-token', DEMO_KEY = 'abeno-staff-demo';
@@ -49,6 +55,7 @@ var StaffAPI = (function () {
   demo.files = demo.files || {};
   demo.pw = demo.pw || {};          // 見本のパスワード（確認モードだけ。本物は GAS がハッシュで持つ）
   demo.devices = demo.devices || {};
+  demo.dev = demo.dev || { jobs: [], spent: 0 }; // AIに改修を頼む（確認モードの見本）
   var DEMO_PW = 'abeno-demo';
   function saveDemo() { ss(DEMO_KEY, JSON.stringify(demo)); }
   function demoStaff(email) { for (var i = 0; i < DEMO_STAFF.length; i++) if (DEMO_STAFF[i].email === email) return DEMO_STAFF[i]; return null; }
@@ -63,6 +70,66 @@ var StaffAPI = (function () {
     saveDemo();
     return out;
   }
+  // ---------- AIに改修を頼む（確認モード）：決まった言い方に反応する見本。HPは変わらない ----------
+  var DEV_CAP = 180, DEV_JOB_CAP = 10;
+  function devCss(text) {
+    var css = [], said = [];
+    if (/ボタン/.test(text)) { css.push('.btn-main{font-size:1.2em;padding:18px 34px' + (/オレンジ|橙/.test(text) ? ';background:#ff8a00;border-color:#ff8a00' : '') + '}'); said.push('申し込みボタンを大きく' + (/オレンジ|橙/.test(text) ? '、オレンジ色に' : '')); }
+    if (/見出し|タイトル/.test(text)) { css.push('h2{color:#e8590c}'); said.push('見出しの色をオレンジに'); }
+    if (/大きく|大きい/.test(text) && !/ボタン/.test(text)) { css.push('body{font-size:17.5px}'); said.push('文字を少し大きく'); }
+    if (/薄|淡/.test(text)) { css.push('.btn-main{filter:saturate(.7) brightness(1.08)}'); said.push('色を少し薄く'); }
+    if (!css.length) { css.push('h2{color:#e8590c}'); said.push('（確認モードの見本なので、見出しの色だけ変えました）'); }
+    return { css: '\n/* AI改修（確認モードの見本）：' + text.replace(/\*\//g, '') + ' */\n' + css.join('\n') + '\n', said: said.join('、') };
+  }
+  function devPub(j) { return { id: j.id, request: j.request, notes: j.notes, status: j.status, summary: j.summary, changed: j.changed, cost: Math.round(j.cost * 100) / 100, created: j.created, by: j.by, applied: j.applied || '', backup: j.backup || '' }; }
+  function devJob(id) { for (var i = 0; i < demo.dev.jobs.length; i++) if (demo.dev.jobs[i].id === id) return demo.dev.jobs[i]; return null; }
+  function devTick(j) {
+    if (j.status === 'working' && Date.now() - j.t > 2500) {
+      var c = devCss(j.notes[j.notes.length - 1]);
+      j.append = (j.append || '') + c.css; j.cost += 0.6 + Math.random() * 1.6; demo.dev.spent += j.cost - (j.billed || 0); j.billed = j.cost;
+      j.status = 'ready'; j.changed = ['assets/style.css'];
+      j.summary = c.said + '。直したファイル：assets/style.css';
+      saveDemo();
+    }
+  }
+  function demoDev(action, p, me) {
+    if (!me.admin) return { ok: false, message: 'AIに改修を頼めるのは管理者だけです。' };
+    var usage = function () { return { spent: Math.round(demo.dev.spent * 100) / 100, cap: DEV_CAP, jobCap: DEV_JOB_CAP }; };
+    if (action === 'devList') { demo.dev.jobs.forEach(devTick); return { ok: true, jobs: demo.dev.jobs.slice().reverse().map(devPub), usage: usage() }; }
+    if (action === 'devStart') {
+      var text = String(p.request || '').trim();
+      if (!text) return { ok: false, message: '頼みたいことを書いてください。' };
+      if (demo.dev.spent >= DEV_CAP) return { ok: false, message: '今月の上限（' + DEV_CAP + 'ドル）に達したので、来月まで頼めません。' };
+      if (demo.dev.jobs.some(function (x) { return x.status === 'working' || x.status === 'ready'; })) return { ok: false, message: '前の依頼がまだ終わっていません。反映するか、やめてから頼んでください。' };
+      var j = { id: 'd' + Date.now().toString(36), request: text, notes: [text], status: 'working', t: Date.now(), cost: 0, changed: [], summary: '', created: nowStr(), by: me.name };
+      demo.dev.jobs.push(j); saveDemo();
+      return { ok: true, job: devPub(j), message: 'AIが作業を始めました。数分かかります（確認モードでは数秒）。' };
+    }
+    var job = devJob(p.id);
+    if (!job) return { ok: false, message: 'その依頼が見つかりません。' };
+    devTick(job);
+    if (action === 'devStatus') return { ok: true, job: devPub(job), usage: usage() };
+    if (action === 'devFiles') return { ok: true, files: { 'assets/style.css': { append: job.append || '' } } };
+    if (action === 'devMore') {
+      if (job.status !== 'ready') return { ok: false, message: '試し表示ができてから頼んでください。' };
+      job.notes.push(String(p.message || '').trim()); job.status = 'working'; job.t = Date.now(); saveDemo();
+      return { ok: true, job: devPub(job) };
+    }
+    if (action === 'devDiscard') { if (job.status !== 'working' && job.status !== 'ready') return { ok: false, message: 'この依頼はもう終わっています。' }; job.status = 'discarded'; saveDemo(); return { ok: true, job: devPub(job), message: 'やめました。HPは変わっていません。' }; }
+    if (action === 'devApply') {
+      if (job.status !== 'ready') return { ok: false, message: 'まだ反映できる状態ではありません。' };
+      job.status = 'applied'; job.applied = nowStr(); job.backup = 'backup-' + job.id; saveDemo();
+      return { ok: true, job: devPub(job), message: '反映しました（確認モードなので、本当のHPは変わりません）。直前の状態はバックアップしました。' };
+    }
+    if (action === 'devRollback') {
+      if (job.status !== 'applied') return { ok: false, message: '反映した依頼だけ元に戻せます。' };
+      demo.dev.jobs.forEach(function (x) { if (x.status === 'applied' && x.applied >= job.applied) x.status = 'rolledback'; });
+      saveDemo();
+      return { ok: true, job: devPub(job), message: '「' + job.request.slice(0, 20) + '」の前の状態に戻しました（確認モード）。' };
+    }
+    return { ok: false, message: '知らない操作です。' };
+  }
+
   function demoHandle(action, p) {
     var me = demoStaff(demo.email);
     if (action === 'requestCode') return { ok: true, message: '登録されているメールなら、6桁のコードを送りました（10分有効）。', demoCode: '123456' };
@@ -135,6 +202,7 @@ var StaffAPI = (function () {
       saveDemo();
       return { ok: true, message: '元に戻しました（確認モード）。' };
     }
+    if (/^dev/.test(action)) return demoDev(action, p, me);
     if (action === 'feedback') {
       if (!String(p.text || '').trim()) return { ok: false, message: '要望を書いてください' };
       return { ok: true, message: '要望を送りました（確認モードのため、どこにも届いていません）。' };

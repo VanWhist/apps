@@ -145,3 +145,31 @@ body{margin:0;display:flex;flex-direction:column;background:var(--wp-bg);color:v
   .ed-panel.closed .ed-panel-in,.ed-panel.closed .ed-tabs{display:none}
   .ed-wrap.dragging iframe{pointer-events:none}
 }
+
+/* AIに改修を頼む */
+.dv-usage{font-size:12.5px;color:var(--wp-sub);background:#fff;border:1px solid var(--wp-line);border-radius:99px;padding:3px 10px}
+.dv-usage.over{color:var(--wp-red);border-color:var(--wp-red)}
+.dv-note{margin-top:10px}
+.dv-h{font-size:16px;font-weight:700;margin:22px 0 10px}
+.dv-jobs{max-width:760px;display:grid;gap:10px}
+.dv-job{background:#fff;border:1px solid var(--wp-line);border-left:4px solid #8c8f94;padding:12px 14px}
+.dv-job.st-working{border-left-color:#dba617}.dv-job.st-ready{border-left-color:var(--wp-blue)}.dv-job.st-applied{border-left-color:#00a32a}.dv-job.st-failed,.dv-job.st-stopped{border-left-color:var(--wp-red)}
+.dv-job p{margin:0 0 6px}
+.dv-job-h{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.dv-st{font-weight:700}
+.dv-meta{font-size:12.5px;color:var(--wp-sub)}
+.dv-req{font-size:15px}
+.dv-notes,.dv-sum{font-size:13.5px;color:var(--wp-sub)}
+.dv-job .ed-btns{align-items:center}
+.dv-warn{font-size:12.5px;color:var(--wp-red)}
+.dv-spin{width:16px;height:16px;border-radius:50%;border:3px solid #dcdcde;border-top-color:var(--wp-blue);animation:dvspin 1s linear infinite}
+@keyframes dvspin{to{transform:rotate(360deg)}}
+.dv-try{display:flex;flex-direction:column;padding:0}
+.dv-try-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 14px;background:#fff;border-bottom:1px solid var(--wp-line)}
+.dv-try-bar select{font-size:15px;padding:6px 8px;border:1px solid #8c8f94;border-radius:4px}
+.dv-try-sum{margin:0;padding:8px 14px;background:#fcf9e8;border-bottom:1px solid #f0e6b5;font-size:13.5px;white-space:pre-line}
+.dv-more{padding:10px 14px;background:#fff;border-bottom:1px solid var(--wp-line)}
+.dv-more textarea{width:100%;font-size:16px;font-family:inherit;border:1px solid #8c8f94;border-radius:4px;padding:8px;margin:0 0 8px}
+.dv-try .ed-site{flex:1;min-height:60vh}
+@media (max-width:860px){.dv-try-bar strong{display:none}.dv-try .ed-site{padding:6px}}
+.ed-nopanel .ed-panel{display:none}
