@@ -1,48 +1,107 @@
-/* HP編集モード（edit.html）。HPそのものは枠（iframe）の中で、いつもの style.css で表示される */
-:root{--ink:#1d1f3f;--ink-2:#4a4d6e;--cream:#fffaf2;--line:#ece5d8;--sun:#ffc93c;--sun-d:#e8a900;--sun-soft:#fff3cc;--coral:#ff6b57;--coral-t:#b83a29;--teal:#16a89a;--teal-t:#0a6f63;--teal-soft:#e2f6f3}
+/*
+ * HP編集モード（edit.html）
+ * WordPress の管理画面・ブロックエディタに見た目と置き場所をそろえている（元 WordPress 利用者が迷わないように）。
+ * 上：管理バー（右上に「プレビュー」「公開」）／左：メニュー（固定ページ・投稿）／真ん中：HP／右：設定パネル（ブロック・変更点・AI）
+ * HPそのものは枠（iframe）の中で、いつもの style.css で表示される。
+ */
+:root{--wp-bar:#1d2327;--wp-menu:#1d2327;--wp-menu-h:#2c3338;--wp-blue:#2271b1;--wp-blue-d:#135e96;--wp-bg:#f0f0f1;--wp-line:#dcdcde;--wp-text:#1d2327;--wp-sub:#50575e;--wp-red:#b32d2e;
+  --ink:#1d1f3f;--ink-2:#4a4d6e;--cream:#fffaf2;--line:#ece5d8;--sun:#ffc93c;--sun-d:#e8a900;--sun-soft:#fff3cc;--coral:#ff6b57;--coral-t:#b83a29;--teal:#16a89a;--teal-t:#0a6f63;--teal-soft:#e2f6f3}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{height:100dvh}
-body{margin:0;display:flex;flex-direction:column;background:#e9e6df;color:var(--ink);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Meiryo",sans-serif;font-size:15px;line-height:1.6}
+body{margin:0;display:flex;flex-direction:column;background:var(--wp-bg);color:var(--wp-text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Meiryo",sans-serif;font-size:14px;line-height:1.6}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.ed-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 14px;background:var(--ink);color:#fff}
-.ed-back{color:#fff;font-weight:700;text-decoration:none;font-size:14px}
-.ed-pagesel select{font:700 15px/1 inherit;font-family:inherit;padding:8px 10px;border-radius:10px;border:0;min-height:38px}
-.ed-mode{margin-left:auto;font-size:12.5px;background:var(--sun);color:var(--ink);padding:4px 10px;border-radius:99px;font-weight:700}
+[hidden]{display:none!important}
+
+/* 管理バー */
+.ed-bar{display:flex;align-items:center;gap:10px;padding:0 12px;min-height:52px;background:var(--wp-bar);color:#f0f0f1}
+.ed-logo{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fff;color:var(--wp-bar);font-weight:800;font-size:13px;text-decoration:none;flex:none}
+.ed-site-name{font-weight:700;font-size:14px}
+.ed-pagesel{display:none}
+.ed-pagesel select{font:700 15px/1 sans-serif;font-family:inherit;padding:8px 10px;border-radius:6px;border:0;min-height:38px}
+.ed-mode{font-size:12px;background:var(--sun);color:var(--ink);padding:3px 10px;border-radius:99px;font-weight:700}
 .ed-mode:empty{display:none}
+.ed-bar-sp{flex:1}
+.ed-count{font-size:12.5px;color:#f0c33c;font-weight:700}
+.ed-tbtn{min-height:36px;padding:0 14px;border-radius:4px;border:1px solid #8c8f94;background:transparent;color:#f0f0f1;font:600 13.5px/1 sans-serif;font-family:inherit;cursor:pointer}
+.ed-tbtn[aria-pressed=true]{background:#f0f0f1;color:var(--wp-bar)}
+.ed-tbtn.pub{background:var(--wp-blue);border-color:var(--wp-blue);color:#fff;min-width:72px}
+.ed-tbtn.pub:hover:not(:disabled){background:var(--wp-blue-d)}
+.ed-tbtn:disabled{opacity:.5;cursor:default}
+
 .ed-wrap{flex:1;display:flex;min-height:0}
-.ed-site{position:relative;flex:1;min-width:0;padding:12px}
-.ed-site iframe{width:100%;height:100%;border:0;border-radius:12px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.12)}
-.ed-loading{position:absolute;top:30px;left:0;right:0;text-align:center;color:var(--ink-2)}
-.ed-loading[hidden]{display:none}
-.ed-panel{width:380px;flex:none;background:var(--cream);border-left:1px solid var(--line);overflow-y:auto}
+
+/* 左メニュー */
+.ed-menu{width:180px;flex:none;background:var(--wp-menu);color:#f0f0f1;overflow-y:auto;padding:8px 0 20px}
+.ed-menu-h{margin:12px 0 2px;padding:0 14px;font-size:11.5px;color:#a7aaad;font-weight:700;letter-spacing:.05em}
+.ed-mi{display:block;width:100%;text-align:left;padding:8px 14px;border:0;background:none;color:#f0f0f1;font:14px/1.4 sans-serif;font-family:inherit;cursor:pointer;text-decoration:none}
+.ed-mi:hover{background:var(--wp-menu-h);color:#72aee6}
+.ed-mi.on{background:var(--wp-blue);color:#fff;font-weight:700}
+
+/* 真ん中 */
+.ed-main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
+.ed-site{position:relative;flex:1;min-height:0;padding:14px}
+.ed-site iframe{width:100%;height:100%;border:1px solid var(--wp-line);background:#fff;display:block}
+.ed-loading{position:absolute;top:30px;left:0;right:0;text-align:center;color:var(--wp-sub)}
+.ed-view{flex:1;overflow-y:auto;padding:18px 24px 40px}
+.ed-view-h{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+.ed-view-h h1{margin:0;font-size:23px;font-weight:400}
+.ed-wpbtn{min-height:34px;padding:0 14px;border-radius:3px;border:1px solid var(--wp-blue);background:var(--wp-blue);color:#fff;font:600 13.5px/1 sans-serif;font-family:inherit;cursor:pointer}
+.ed-wpbtn:hover{background:var(--wp-blue-d)}
+.ed-wpbtn.ghost{background:#f6f7f7;color:var(--wp-blue)}
+.ed-wpbtn.ghost:hover{background:#f0f0f1}
+.ed-wpbtn.danger{color:var(--wp-red);border-color:var(--wp-red)}
+.ed-list{width:100%;border-collapse:collapse;background:#fff;border:1px solid #c3c4c7}
+.ed-list th,.ed-list td{text-align:left;padding:9px 10px;border-bottom:1px solid #f0f0f1;vertical-align:top}
+.ed-list thead th{font-weight:400;border-bottom:1px solid #c3c4c7}
+.ed-list tbody tr:nth-child(odd){background:#f6f7f7}
+.ed-list .t{font-weight:700;color:var(--wp-blue);background:none;border:0;padding:0;font:700 14px/1.5 sans-serif;font-family:inherit;cursor:pointer;text-align:left}
+.ed-list .acts{font-size:12.5px;margin-top:3px;color:var(--wp-sub)}
+.ed-list .acts button{background:none;border:0;padding:0;color:var(--wp-blue);font:12.5px sans-serif;font-family:inherit;cursor:pointer}
+.ed-list .acts button.del{color:var(--wp-red)}
+.ed-list .st{color:var(--wp-sub);font-size:12.5px;font-weight:700}
+.ed-post{max-width:760px;background:#fff;border:1px solid var(--wp-line);padding:20px 22px}
+.ed-post-title{width:100%;border:0;border-bottom:1px solid var(--wp-line);font:700 26px/1.4 sans-serif;font-family:inherit;padding:6px 0;margin:0 0 14px;color:var(--wp-text)}
+.ed-post-title:focus{outline:none;border-color:var(--wp-blue)}
+.ed-post textarea{width:100%;font:16px/1.7 sans-serif;font-family:inherit;border:1px solid var(--wp-line);border-radius:2px;padding:10px;margin:0 0 12px}
+.ed-post-meta{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 10px}
+.ed-post-meta label{font-size:13px;font-weight:700;display:flex;gap:6px;align-items:center}
+.ed-post-meta input{font:15px sans-serif;font-family:inherit;padding:5px 8px;border:1px solid #8c8f94;border-radius:3px}
+
+/* 右の設定パネル */
+.ed-panel{width:340px;flex:none;background:#fff;border-left:1px solid var(--wp-line);overflow-y:auto}
+.ed-tabs{display:flex;border-bottom:1px solid var(--wp-line);position:sticky;top:0;background:#fff;z-index:1}
+.ed-tab{flex:1;padding:12px 6px;border:0;border-bottom:3px solid transparent;background:none;font:600 13.5px/1 sans-serif;font-family:inherit;color:var(--wp-sub);cursor:pointer}
+.ed-tab[aria-selected=true]{color:var(--wp-text);border-bottom-color:var(--wp-blue)}
+.ed-tab span{display:inline-block;margin-left:4px;min-width:18px;padding:1px 5px;border-radius:9px;background:#d63638;color:#fff;font-size:11px}
+.ed-tab span:empty{display:none}
 .ed-panel-in{padding:12px 14px 30px}
 .ed-grip{display:none}
-.ed-who{margin:0 0 8px;font-size:13px;color:var(--ink-2)}
-.ed-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 10px}
-.ed-box h2{margin:0 0 6px;font-size:15px}
-.ed-hint{margin:0 0 6px;font-size:13px;color:var(--ink-2)}
-.ed-hint[hidden],[hidden]{display:none!important}
+.ed-who{margin:0 0 8px;font-size:12.5px;color:var(--wp-sub)}
+.ed-box{border:0;padding:0;margin:0 0 10px}
+.ed-box h2{margin:0 0 8px;font-size:14px;font-weight:700}
+.ed-hint{margin:0 0 8px;font-size:13px;color:var(--wp-sub)}
 .ed-where{margin:0 0 6px;font-weight:700;font-size:13.5px;display:flex;justify-content:space-between;gap:6px;align-items:flex-start}
-.ed-box textarea,.ed-box select{width:100%;font:16px/1.5 inherit;font-family:inherit;color:var(--ink);background:var(--cream);border:2px solid var(--line);border-radius:12px;padding:8px 10px;margin:0 0 8px}
-.ed-box textarea:focus{border-color:var(--ink);outline:none}
+.ed-box textarea,.ed-box select{width:100%;font:16px/1.5 sans-serif;font-family:inherit;color:var(--wp-text);background:#fff;border:1px solid #8c8f94;border-radius:4px;padding:8px 10px;margin:0 0 8px}
+.ed-box textarea:focus,.ed-box input[type=text]:focus{border-color:var(--wp-blue);box-shadow:0 0 0 1px var(--wp-blue);outline:none}
 .ed-btns{display:flex;gap:8px;flex-wrap:wrap}
-.ed-btn{min-height:44px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:#fff;font:700 14.5px/1 inherit;font-family:inherit;color:var(--ink);cursor:pointer}
-.ed-btn.main{background:var(--sun);border-color:var(--sun-d);box-shadow:0 3px 0 var(--sun-d);flex:1}
-.ed-btn:disabled{opacity:.45;cursor:default;box-shadow:none}
-.ed-chip{display:block;width:100%;text-align:left;margin:0 0 6px;padding:8px 10px;border-radius:10px;border:1px solid var(--sun-d);background:var(--sun-soft);font:13.5px/1.4 inherit;font-family:inherit;color:var(--ink);cursor:pointer}
+.ed-btn{min-height:40px;padding:0 14px;border-radius:4px;border:1px solid var(--wp-blue);background:#f6f7f7;font:600 14px/1 sans-serif;font-family:inherit;color:var(--wp-blue);cursor:pointer}
+.ed-btn.main{background:var(--wp-blue);color:#fff;flex:1}
+.ed-btn.main:hover:not(:disabled){background:var(--wp-blue-d)}
+.ed-btn:disabled{opacity:.45;cursor:default}
+.ed-chip{display:block;width:100%;text-align:left;margin:0 0 6px;padding:8px 10px;border-radius:4px;border:1px solid var(--wp-line);background:#f6f7f7;font:13.5px/1.4 sans-serif;font-family:inherit;color:var(--wp-text);cursor:pointer}
+.ed-chip:hover{border-color:var(--wp-blue)}
 .ed-ex{margin:0 0 6px}
 .ed-reply{margin:8px 0 0;font-size:13.5px}
-.ed-pend{border-color:var(--coral)}
-.ed-row{margin:0 0 10px;padding:0 0 10px;border-bottom:1px dashed var(--line)}
+.ed-row{margin:0 0 10px;padding:0 0 10px;border-bottom:1px solid #f0f0f1}
 .ed-ba{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;line-height:1.5}
-.ed-ba>div{border-radius:8px;padding:6px 8px;word-break:break-word;min-width:0}
+.ed-ba>div{border-radius:4px;padding:6px 8px;word-break:break-word;min-width:0}
 .ed-ba span{display:block;font-size:11px;font-weight:700}
-.ed-ba .b{background:#f3efe7;color:var(--ink-2)}
-.ed-ba .a{background:var(--sun-soft);border:1px solid var(--sun-d)}
-.ed-x{flex:none;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:15px;line-height:1}
-.ed-msg{margin:8px 0 0;font-size:13.5px;font-weight:700;color:var(--teal-t)}
-.ed-msg.err{color:var(--coral-t)}
+.ed-ba .b{background:#f6f7f7;color:var(--wp-sub)}
+.ed-ba .a{background:#edfaef;border:1px solid #68de7c}
+.ed-x{flex:none;width:26px;height:26px;border-radius:50%;border:1px solid var(--wp-line);background:#fff;cursor:pointer;font-size:14px;line-height:1}
+.ed-msg{margin:8px 0 0;font-size:13.5px;font-weight:700;color:#00a32a}
+.ed-msg.err{color:var(--wp-red)}
 .ed-msg:empty{display:none}
 
 /* 写真 */
@@ -54,22 +113,35 @@ body{margin:0;display:flex;flex-direction:column;background:#e9e6df;color:var(--
 .ed-file{display:flex;align-items:center;justify-content:center;width:100%;margin:0 0 6px;background:var(--teal-soft);border-color:var(--teal);color:var(--teal-t);position:relative;overflow:hidden}
 .ed-file input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
 .ed-lbl{display:block;font-size:12.5px;font-weight:700;margin:4px 0 4px}
-.ed-box input[type=text]{width:100%;font:16px/1.5 inherit;font-family:inherit;color:var(--ink);background:var(--cream);border:2px solid var(--line);border-radius:12px;padding:8px 10px;margin:0 0 8px}
+.ed-box input[type=text]{width:100%;font:16px/1.5 sans-serif;font-family:inherit;color:var(--ink);background:var(--cream);border:2px solid var(--line);border-radius:12px;padding:8px 10px;margin:0 0 8px}
 .ed-check{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;font-weight:700;margin:0 0 10px;padding:8px 10px;border-radius:10px;background:#fff1ee;border:1px solid #ffc9c0}
 .ed-check input{width:22px;height:22px;flex:none;margin:0}
 .ed-ba img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;margin:2px 0 0}
 
-/* スマホ・タブレット縦：上にHP、下に編集パネル。間のバーを上下に動かして広さを変える */
+
+/* スマホ・タブレット縦：左メニューの代わりに上のページ選択。上にHP、下に設定パネル。間のバーを上下に動かして広さを変える */
 @media (max-width:860px){
+  .ed-bar{gap:6px;padding:6px 8px;flex-wrap:wrap}
+  .ed-site-name,.ed-menu,.ed-count,.ed-logo,.ed-bar-sp{display:none}
+  .ed-bar{flex-wrap:nowrap}
+  .ed-pagesel{display:block;flex:1;min-width:0}
+  .ed-pagesel select{width:100%;font-size:14px}
+  .ed-mode{font-size:11px;padding:2px 7px;white-space:nowrap}
+  .ed-tbtn{padding:0 9px;font-size:13px;min-height:36px;white-space:nowrap}
+  .ed-tbtn.pub{min-width:0}
   .ed-wrap{flex-direction:column}
+  .ed-main{flex:1;min-height:0}
   /* HPの枠は中でスクロール（iPhoneは枠の高さが中身に合わせて伸びるため、外側をスクロール箱にする） */
-  .ed-site{flex:1;min-height:0;padding:0;overflow:auto;-webkit-overflow-scrolling:touch}
-  .ed-site iframe{display:block;border-radius:0}
-  .ed-panel{flex:none;width:auto;height:55%;display:flex;flex-direction:column;overflow:hidden;border-left:0;border-top:2px solid var(--ink);border-radius:18px 18px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.18)}
+  .ed-site{padding:0;overflow:auto;-webkit-overflow-scrolling:touch}
+  .ed-site iframe{border:0}
+  .ed-view{padding:12px 12px 30px}
+  .ed-post{padding:14px}
+  .ed-panel{flex:none;width:auto;height:55%;display:flex;flex-direction:column;overflow:hidden;border-left:0;border-top:2px solid var(--wp-bar);border-radius:14px 14px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.18)}
+  .ed-tabs{position:static;flex:none}
   .ed-panel-in{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(30px + env(safe-area-inset-bottom))}
-  .ed-grip{display:block;flex:none;width:100%;padding:10px 10px calc(10px + env(safe-area-inset-bottom) * var(--closed,0));border:0;background:var(--cream);font:700 14px/1 inherit;font-family:inherit;color:var(--ink);cursor:ns-resize;touch-action:none;-webkit-user-select:none;user-select:none}
-  .ed-grip::before{content:"";display:block;width:48px;height:5px;border-radius:3px;background:#a9a399;margin:0 auto 7px}
+  .ed-grip{display:block;flex:none;width:100%;padding:10px 10px calc(10px + env(safe-area-inset-bottom) * var(--closed,0));border:0;background:#fff;font:700 14px/1 sans-serif;font-family:inherit;color:var(--wp-text);cursor:ns-resize;touch-action:none;-webkit-user-select:none;user-select:none}
+  .ed-grip::before{content:"";display:block;width:48px;height:5px;border-radius:3px;background:#a7aaad;margin:0 auto 7px}
   .ed-panel.closed{height:auto!important;--closed:1}
-  .ed-panel.closed .ed-panel-in{display:none}
+  .ed-panel.closed .ed-panel-in,.ed-panel.closed .ed-tabs{display:none}
   .ed-wrap.dragging iframe{pointer-events:none}
 }

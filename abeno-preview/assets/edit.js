@@ -1,6 +1,7 @@
 /*
  * HP編集モード（edit.html）
  * ------------------------------------------------------------
+ * 見た目と置き場所は WordPress の管理画面・ブロックエディタに寄せている（元 WordPress 利用者が迷わないように）。
  * HPのページをそのまま枠の中に表示し、site-data.js から来ている文字に点線の枠を付ける。
  * クリック → 右のパネルで直す → 変更点の表にたまる → 「まとめて反映」で GAS へ（会話型と同じ検査・保存）。
  * HP本体（app.js など）には手を入れず、外から読み込んで印を付けているだけ。
@@ -20,14 +21,33 @@
   // 名前が「しくみ」になっている所（スケジュールのクラス名の並び）は直さない
   var SKIP_PATH = /^schedule\/rows\//;
 
-  var S = { v: Date.now().toString(36), files: {}, photo: null, me: null, allowed: [], roots: [], base: null, sha: '', pending: [], page: 'index.html', sel: null, html: {}, busy: false, index: {} };
+  var S = { view: 'page', preview: false, v: Date.now().toString(36), files: {}, photo: null, me: null, allowed: [], roots: [], base: null, sha: '', pending: [], page: 'index.html', sel: null, html: {}, busy: false, index: {} };
 
   // ---------- 起動 ----------
   if (!A.loggedIn()) { location.replace('staff.html?next=edit'); return; }
   $('mode').textContent = A.DEMO ? '確認モード' : '';
   $('mode').title = A.DEMO ? '反映してもHPは変わりません' : '';
-  $('page').innerHTML = PAGES.map(function (p) { return '<option value="' + p.file + '">' + p.label + '</option>'; }).join('');
-  $('page').addEventListener('change', function () { S.page = this.value; S.sel = null; showForm(false); render(true); });
+  // ページの選び方：PCは左メニュー（固定ページ）、スマホは上の選択
+  $('page').innerHTML = PAGES.map(function (p) { return '<option value="' + p.file + '">' + p.label + '</option>'; }).join('') +
+    '<option value="#posts">お知らせ一覧（投稿）</option><option value="#req">この画面への要望</option>';
+  $('menu-pages').innerHTML = PAGES.map(function (p) { return '<button type="button" class="ed-mi" data-page="' + p.file + '">' + p.label + '</button>'; }).join('');
+  $('page').addEventListener('change', function () {
+    if (this.value.charAt(0) === '#') return showView(this.value.slice(1));
+    openPage(this.value);
+  });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-page],[data-view],[data-tab]');
+    if (!b || b.closest('#site')) return;
+    if (b.hasAttribute('data-page')) openPage(b.getAttribute('data-page'));
+    else if (b.hasAttribute('data-view')) showView(b.getAttribute('data-view'));
+    else { setTab(b.getAttribute('data-tab')); openPanel(); }
+  });
+  $('publish').addEventListener('click', function () { setTab('pend'); openPanel(); $('apply').click(); });
+  $('preview').addEventListener('click', function () {
+    S.preview = !S.preview; this.setAttribute('aria-pressed', String(S.preview));
+    this.textContent = S.preview ? (NARROW.matches ? '編集に戻る' : 'プレビュー中（編集に戻る）') : 'プレビュー';
+    if (S.view !== 'page') showView('page'); else applyPreview();
+  });
   // スマホ：パネル上のバーをタップで開け閉め、上下に動かすとHPとパネルの広さを変えられる
   var NARROW = window.matchMedia('(max-width:860px)'), lastH = 0, dragged = false;
   (function () {
@@ -60,6 +80,7 @@
   })();
   // スマホでは最初はパネルを畳んで、HPを広く見せる（文字をタップすると開く）
   setPanel(!NARROW.matches);
+  showView('page', true);
   loadState();
 
   function loadState() {
@@ -113,6 +134,7 @@
         mark(doc);
         new MutationObserver(function () { mark(doc); }).observe(doc.body, { childList: true, subtree: true });
         doc.addEventListener('click', onFrameClick, true);
+        applyPreview();
         if (y) frame.contentWindow.scrollTo(0, y);
       };
       frame.srcdoc = html;
@@ -123,7 +145,9 @@
     '[data-ed].ed-on{outline:3px solid #ff6b57;background:rgba(255,201,60,.35)}' +
     '[data-photo]{outline:3px dashed rgba(22,168,154,.8);outline-offset:-3px;cursor:pointer}' +
     '[data-photo].ed-on{outline:4px solid #16a89a}' +
-    '.hd{position:static!important}';
+    '.hd{position:static!important}' +
+    // プレビュー中は、公開されたときと同じ見た目（枠も「写真を入れる」も出さない）
+    'body.ed-pv [data-ed],body.ed-pv [data-photo]{outline:none!important;background:none!important;cursor:auto!important}body.ed-pv .photo-add{display:none!important}';
   // まだ保存していない写真は、HPのプレビューでは手元の画像（data:）で見せる
   function photoUrl(src) { return S.files[src] || (A.demoFile && A.demoFile(src)) || src; }
   function withFiles(data) {
@@ -226,6 +250,7 @@
   // ---------- クリック ----------
   function onFrameClick(e) {
     var t = e.target;
+    if (S.preview) { var l = t.closest && t.closest('a[href]'); if (l) { e.preventDefault(); goLink(l); } return; }
     var ph = t.closest && t.closest('[data-photo]');
     if (ph) { e.preventDefault(); e.stopPropagation(); selectPhoto(ph); return; }
     var ed = t.closest && t.closest('[data-ed]');
@@ -240,15 +265,20 @@
       var href = link.getAttribute('href') || '';
       var file = href.split('#')[0];
       var hit = PAGES.filter(function (p) { return p.file === file; })[0];
-      if (hit) { S.page = hit.file; $('page').value = hit.file; render(true); }
+      if (hit) openPage(hit.file);
     }
+  }
+  function goLink(link) {
+    var file = (link.getAttribute('href') || '').split('#')[0];
+    var hit = PAGES.filter(function (p) { return p.file === file; })[0];
+    if (hit) openPage(hit.file);
   }
   function select(el) {
     var doc = el.ownerDocument;
     doc.querySelectorAll('.ed-on').forEach(function (x) { x.classList.remove('ed-on'); });
     el.classList.add('ed-on');
     var paths = resolve(el, el.getAttribute('data-ed'));
-    openPanel();
+    setTab('block'); openPanel();
     if (paths.length === 1) return editPath(paths[0]);
     var data = previewData();
     showForm(true);
@@ -278,7 +308,7 @@
     doc.querySelectorAll('.ed-on').forEach(function (x) { x.classList.remove('ed-on'); });
     el.classList.add('ed-on');
     var path = el.getAttribute('data-photo');
-    openPanel();
+    setTab('block'); openPanel();
     $('edit-form').hidden = true; $('edit-hint').hidden = true; $('photo-form').hidden = false;
     $('photo-where').textContent = Core.describe(previewData(), path);
     if (S.roots.indexOf(path.split('/')[0]) < 0) {
@@ -367,12 +397,18 @@
       S.pending.push(c);
     });
     try { Core.applyChanges(S.base, S.pending, S.allowed, '*'); }
-    catch (e) { S.pending = S.pending.slice(0, S.pending.length - list.length); msg(e.message, true); return; }
+    catch (e) { S.pending = S.pending.slice(0, S.pending.length - list.length); msg(e.message, true); return e.message; }
     msg('');
     renderPending(); render(false);
+    if (S.view === 'posts') renderPosts();
+    return '';
   }
   function renderPending() {
     gripLabel();
+    var n = S.pending.length;
+    $('count').hidden = !n; $('count').textContent = '未公開の変更 ' + n + '件';
+    $('tab-n').textContent = n ? String(n) : '';
+    $('publish').disabled = !n;
     if (!S.pending.length) {
       $('pending').innerHTML = '<p class="ed-hint">まだありません。HPのプレビューには、加えた変更がすぐ映ります。</p>';
       $('apply').disabled = true; $('clear').hidden = true; return;
@@ -436,6 +472,110 @@
       if (res.changes && res.changes.length) { $('ai-text').value = ''; addChanges(res.changes); }
     });
   }
+
+  // ---------- 画面の切りかえ（WordPress の「固定ページ」「投稿」のように） ----------
+  function openPage(file) {
+    S.page = file; S.sel = null; showForm(false);
+    showView('page', true);
+    render(true);
+  }
+  function showView(name, noRender) {
+    if (name === 'post-new') { openPost(-1); name = 'post'; }
+    S.view = name;
+    $('view-page').hidden = name !== 'page';
+    $('view-posts').hidden = name !== 'posts';
+    $('view-post').hidden = name !== 'post';
+    $('view-req').hidden = name !== 'req';
+    $('page').value = name === 'page' ? S.page : (name === 'req' ? '#req' : '#posts');
+    document.querySelectorAll('.ed-menu .ed-mi').forEach(function (b) {
+      var on = name === 'page' ? b.getAttribute('data-page') === S.page : b.getAttribute('data-view') === name || (name === 'post' && S.post < 0 && b.getAttribute('data-view') === 'post-new');
+      b.classList.toggle('on', !!on);
+    });
+    if (name === 'posts') renderPosts();
+    if (name === 'page' && !noRender && !$('site').srcdoc) render(true);
+    if (name === 'page') applyPreview();
+  }
+  function applyPreview() {
+    try { $('site').contentDocument.body.classList.toggle('ed-pv', S.preview); } catch (e) { /* 読み込み中 */ }
+    $('panel').style.visibility = S.preview && !NARROW.matches ? 'hidden' : '';
+  }
+  function setTab(name) {
+    document.querySelectorAll('.ed-tab').forEach(function (t) { t.setAttribute('aria-selected', String(t.getAttribute('data-tab') === name)); });
+    document.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== name; });
+  }
+
+  // ---------- 投稿（お知らせ）一覧・編集 ----------
+  function canNews() { return S.roots.indexOf('news') >= 0; }
+  function renderPosts() {
+    var list = (previewData().news || []).map(function (n, i) { return { n: n, i: i }; })
+      .sort(function (a, b) { return a.n.date < b.n.date ? 1 : a.n.date > b.n.date ? -1 : a.i - b.i; });
+    var changed = {};
+    S.pending.forEach(function (c) { var m = /^news\/(\d+)/.exec(c.path); if (m) changed[m[1]] = 1; });
+    $('posts').innerHTML = !canNews() ? '<tr><td colspan="3">お知らせは担当の項目ではありません。</td></tr>' : list.map(function (x) {
+      return '<tr><td><button type="button" class="t" data-post="' + x.i + '">' + esc(x.n.title || '（タイトルなし）') + '</button>' +
+        (changed[x.i] ? ' <span class="st">— 未公開の変更あり</span>' : '') +
+        '<div class="acts"><button type="button" data-post="' + x.i + '">編集</button> | <button type="button" class="del" data-trash="' + x.i + '">ゴミ箱へ移動</button></div></td>' +
+        '<td>' + esc(x.n.tag || '') + '</td><td>' + esc(Core.fmtDate(x.n.date)) + '</td></tr>';
+    }).join('');
+  }
+  $('posts').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-post],[data-trash]'); if (!b) return;
+    if (b.hasAttribute('data-post')) { openPost(+b.getAttribute('data-post')); showView('post'); }
+    else trashPost(+b.getAttribute('data-trash'));
+  });
+  function today() { return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); }
+  function openPost(i) {
+    var news = previewData().news || [], n = i >= 0 ? news[i] : null;
+    S.post = i;
+    $('post-h').textContent = n ? '投稿を編集' : '新規投稿を追加';
+    $('post-title').value = n ? n.title || '' : '';
+    $('post-body').value = n ? n.body || '' : '';
+    $('post-date').value = n ? n.date : today();
+    $('post-tag').value = n ? n.tag || '' : 'お知らせ';
+    var tags = []; news.forEach(function (x) { if (x.tag && tags.indexOf(x.tag) < 0) tags.push(x.tag); });
+    $('post-tags').innerHTML = tags.map(function (t) { return '<option value="' + esc(t) + '">'; }).join('');
+    $('post-trash').hidden = !n;
+    $('post-msg').textContent = ''; $('post-msg').className = 'ed-msg';
+    $('post-save').disabled = !canNews();
+    if (!canNews()) postMsg('お知らせは担当の項目ではないため、変えられません。', true);
+  }
+  function postMsg(t, err) { $('post-msg').textContent = t; $('post-msg').className = 'ed-msg' + (err ? ' err' : ''); }
+  $('post-save').addEventListener('click', function () {
+    var title = $('post-title').value.trim(), date = $('post-date').value;
+    if (!title) return postMsg('タイトルを入れてください。', true);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return postMsg('日付を選んでください。', true);
+    var news = previewData().news || [], old = S.post >= 0 ? news[S.post] : null;
+    var v = JSON.parse(JSON.stringify(old || {}));
+    v.date = date; v.tag = $('post-tag').value.trim() || 'お知らせ'; v.title = title;
+    var body = $('post-body').value.replace(/\s+$/, '');
+    if (body) v.body = body; else delete v.body;
+    var err = addChanges([old ? { op: 'set', path: 'news/' + S.post, value_json: JSON.stringify(v), summary: 'お知らせを編集' }
+      : { op: 'add', path: 'news/0', value_json: JSON.stringify(v), summary: 'お知らせを追加' }]);
+    if (err) return postMsg(err, true);
+    if (!old) S.post = 0;
+    $('post-h').textContent = '投稿を編集'; $('post-trash').hidden = false;
+    postMsg('変更点に入れました。右上の「公開」でHPに出ます（' + S.pending.length + '件）。');
+  });
+  $('post-trash').addEventListener('click', function () { if (S.post >= 0 && trashPost(S.post)) showView('posts'); });
+  function trashPost(i) {
+    var n = (previewData().news || [])[i]; if (!n) return false;
+    if (!window.confirm('「' + n.title + '」をゴミ箱へ移動しますか？（公開するまでHPからは消えません）')) return false;
+    var err = addChanges([{ op: 'remove', path: 'news/' + i, value_json: '', summary: 'お知らせを削除' }]);
+    if (err) { window.alert(err); return false; }
+    return true;
+  }
+
+  // ---------- この画面への要望（作りを直すのは管理者。ここでは記録に残すだけ） ----------
+  $('req-send').addEventListener('click', function () {
+    var text = $('req-text').value.trim(); if (!text) return;
+    var b = this; b.disabled = true; $('req-msg').textContent = '送っています…'; $('req-msg').className = 'ed-msg';
+    A.call('feedback', { text: text, page: S.page }).then(function (res) {
+      b.disabled = false;
+      $('req-msg').textContent = res.ok ? (res.message || '送りました。') : res.message;
+      $('req-msg').className = 'ed-msg' + (res.ok ? '' : ' err');
+      if (res.ok) $('req-text').value = '';
+    });
+  });
 
   // ---------- 小物 ----------
   // 文字をタップしたときは、直す欄が見える広さ（画面の4割以上）で開く

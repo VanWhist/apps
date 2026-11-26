@@ -98,6 +98,10 @@ var StaffAPI = (function () {
       saveDemo();
       return { ok: true, message: '元に戻しました（確認モード）。' };
     }
+    if (action === 'feedback') {
+      if (!String(p.text || '').trim()) return { ok: false, message: '要望を書いてください' };
+      return { ok: true, message: '要望を送りました（確認モードのため、どこにも届いていません）。' };
+    }
     if (action === 'logout') { demo.email = ''; saveDemo(); }
     return { ok: true };
   }

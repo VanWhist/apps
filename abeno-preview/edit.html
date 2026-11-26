@@ -8,31 +8,96 @@
 <!-- スタッフ専用。検索エンジンに載せない（公開後も消さない） -->
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='11' r='6' fill='%23ff6b57'/%3E%3Cpath d='M4 30 Q20 40 36 30' stroke='%231d1f3f' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="assets/edit.css?v=20261125d">
+<link rel="stylesheet" href="assets/edit.css?v=20261126a">
 </head>
 <body>
+<!-- WordPress の管理画面に似せた形：上に管理バー、左にメニュー、真ん中でHPを直接編集、右に設定パネル -->
 <header class="ed-bar">
-  <a class="ed-back" href="staff.html">← 更新ページ</a>
+  <a class="ed-logo" href="staff.html" title="スマホ用の更新ページへ">AJ</a>
+  <span class="ed-site-name">アベノジュニア</span>
   <label class="ed-pagesel"><span class="sr">ページ</span>
     <select id="page"></select>
   </label>
   <span class="ed-mode" id="mode"></span>
+  <span class="ed-bar-sp"></span>
+  <span class="ed-count" id="count" hidden></span>
+  <button type="button" class="ed-tbtn" id="preview" aria-pressed="false">プレビュー</button>
+  <button type="button" class="ed-tbtn pub" id="publish" disabled>公開</button>
 </header>
 
 <div class="ed-wrap">
-  <div class="ed-site">
-    <iframe id="site" title="HPのプレビュー（直したい文字をクリック）"></iframe>
-    <p class="ed-loading" id="loading">読み込み中…</p>
-  </div>
+  <nav class="ed-menu" id="menu" aria-label="管理メニュー">
+    <p class="ed-menu-h">固定ページ</p>
+    <div id="menu-pages"></div>
+    <p class="ed-menu-h">投稿</p>
+    <button type="button" class="ed-mi" data-view="posts">お知らせ一覧</button>
+    <button type="button" class="ed-mi" data-view="post-new">新規追加</button>
+    <p class="ed-menu-h">そのほか</p>
+    <button type="button" class="ed-mi" data-tab="ai">AIに頼む</button>
+    <button type="button" class="ed-mi" data-view="req">この画面への要望</button>
+    <a class="ed-mi" href="staff.html">スマホ用の更新ページ</a>
+  </nav>
 
-  <aside class="ed-panel" id="panel" aria-label="編集">
+  <main class="ed-main">
+    <div class="ed-site" id="view-page">
+      <iframe id="site" title="HPの編集画面（直したい文字や写真をクリック）"></iframe>
+      <p class="ed-loading" id="loading">読み込み中…</p>
+    </div>
+
+    <!-- 投稿（お知らせ）一覧 -->
+    <section class="ed-view" id="view-posts" hidden>
+      <div class="ed-view-h"><h1>お知らせ</h1><button type="button" class="ed-wpbtn" data-view="post-new">新規追加</button></div>
+      <table class="ed-list"><thead><tr><th>タイトル</th><th>種類</th><th>日付</th></tr></thead><tbody id="posts"></tbody></table>
+    </section>
+
+    <!-- 投稿の編集 -->
+    <section class="ed-view" id="view-post" hidden>
+      <div class="ed-view-h"><h1 id="post-h">新規投稿を追加</h1><button type="button" class="ed-wpbtn ghost" data-view="posts">一覧へ戻る</button></div>
+      <div class="ed-post">
+        <label class="sr" for="post-title">タイトル</label>
+        <input type="text" id="post-title" class="ed-post-title" placeholder="タイトルを追加" maxlength="120">
+        <label class="sr" for="post-body">本文</label>
+        <textarea id="post-body" rows="10" placeholder="本文を入力（なくてもかまいません）"></textarea>
+        <div class="ed-post-meta">
+          <label>日付 <input type="date" id="post-date"></label>
+          <label>種類 <input type="text" id="post-tag" maxlength="20" list="post-tags"></label>
+          <datalist id="post-tags"></datalist>
+        </div>
+        <p class="ed-hint">写真は、変更点に入れたあと、お知らせのページで「📷 写真を入れる」から付けられます。</p>
+        <div class="ed-btns">
+          <button type="button" class="ed-wpbtn" id="post-save">変更点に入れる</button>
+          <button type="button" class="ed-wpbtn ghost danger" id="post-trash" hidden>ゴミ箱へ移動</button>
+        </div>
+        <p class="ed-msg" id="post-msg" role="status"></p>
+      </div>
+    </section>
+
+    <!-- この画面への要望 -->
+    <section class="ed-view" id="view-req" hidden>
+      <div class="ed-view-h"><h1>この画面への要望</h1></div>
+      <div class="ed-post">
+        <p class="ed-hint">「ここが分かりにくい」「こういうボタンがほしい」など、この編集画面の作りへの要望を書いてください。記録シートに残り、管理者（Van）が確認して作りを直します。HPの文字や写真を変えたいときは、ここではなくHPの画面か「AIに頼む」で。</p>
+        <label class="sr" for="req-text">要望</label>
+        <textarea id="req-text" rows="6" maxlength="2000" placeholder="例：公開ボタンをもっと大きくしてほしい"></textarea>
+        <div class="ed-btns"><button type="button" class="ed-wpbtn" id="req-send">要望を送る</button></div>
+        <p class="ed-msg" id="req-msg" role="status"></p>
+      </div>
+    </section>
+  </main>
+
+  <aside class="ed-panel" id="panel" aria-label="設定パネル">
     <button type="button" class="ed-grip" id="grip" aria-expanded="true">編集パネル</button>
-    <div class="ed-panel-in">
+    <div class="ed-tabs" role="tablist">
+      <button type="button" role="tab" class="ed-tab" data-tab="block" aria-selected="true">ブロック</button>
+      <button type="button" role="tab" class="ed-tab" data-tab="pend" aria-selected="false">変更点<span id="tab-n"></span></button>
+      <button type="button" role="tab" class="ed-tab" data-tab="ai" aria-selected="false">AI</button>
+    </div>
+<div class="ed-panel-in">
       <p class="ed-who" id="who"></p>
 
       <!-- 選んだ文字を直す -->
-      <section class="ed-box" id="box-edit">
-        <h2>1. 直したい文字・写真をクリック</h2>
+      <section class="ed-box" id="box-edit" data-pane="block">
+        <h2>ブロック</h2>
         <p class="ed-hint" id="edit-hint">HPの中で、点線の枠が出る文字や写真をクリック（スマホはタップ）すると、ここで直せます。写真がない所には「📷 写真を入れる」の枠が出ます。枠が出ない所（住所・ボタンなど）はこの画面では直せません。</p>
         <div id="edit-form" hidden>
           <p class="ed-where" id="edit-where"></p>
@@ -65,8 +130,8 @@
       </section>
 
       <!-- AIに頼む -->
-      <section class="ed-box">
-        <h2>まとめて頼む（AI）</h2>
+      <section class="ed-box" data-pane="ai" hidden>
+        <h2>AIに頼む</h2>
         <p class="ed-hint">お知らせを足す・練習日を休みにするなど、クリックでは難しいことはここに書いてください。</p>
         <label class="sr" for="ai-area">項目</label>
         <select id="ai-area"></select>
@@ -78,11 +143,11 @@
       </section>
 
       <!-- 変更点の表 -->
-      <section class="ed-box ed-pend">
-        <h2>2. 変更点（まだ反映していません）</h2>
+      <section class="ed-box ed-pend" data-pane="pend" hidden>
+        <h2>変更点（まだ公開していません）</h2>
         <div id="pending"><p class="ed-hint">まだありません。HPのプレビューには、加えた変更がすぐ映ります。</p></div>
         <div class="ed-btns">
-          <button type="button" class="ed-btn main" id="apply" disabled>3. まとめてHPに反映する</button>
+          <button type="button" class="ed-btn main" id="apply" disabled>公開する</button>
           <button type="button" class="ed-btn" id="clear" hidden>全部やめる</button>
         </div>
         <p class="ed-msg" id="msg" role="status"></p>
@@ -91,10 +156,10 @@
   </aside>
 </div>
 
-<script src="data/staff-config.js?v=20261125d"></script>
-<script src="data/site-data.js?v=20261125d"></script>
-<script src="assets/staff-core.js?v=20261125d"></script>
-<script src="assets/staff-api.js?v=20261125d"></script>
-<script src="assets/edit.js?v=20261125d"></script>
+<script src="data/staff-config.js?v=20261126a"></script>
+<script src="data/site-data.js?v=20261126a"></script>
+<script src="assets/staff-core.js?v=20261126a"></script>
+<script src="assets/staff-api.js?v=20261126a"></script>
+<script src="assets/edit.js?v=20261126a"></script>
 </body>
 </html>
