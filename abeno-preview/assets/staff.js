@@ -1,7 +1,7 @@
 /*
  * スタッフ用更新ページ（staff.html）
  * ------------------------------------------------------------
- * 流れ: ログイン（メールの6桁コード）→ 項目を選ぶ → 依頼を書く → 変更点の表を確認 → 反映
+ * 流れ: ログイン（メール＋パスワード、またはメールの6桁コード。「この端末を覚える」で次から自動）→ 項目を選ぶ → 依頼を書く → 変更点の表を確認 → 反映
  * STAFF_CONFIG.api が空のあいだは確認モード（見本のログイン・見本の返事・この画面の中だけで反映）。
  * 本物の判定と保存は GAS（gas/staff/Code.gs）が行い、ここでの検査は見せるためだけ。
  */
@@ -45,16 +45,33 @@
       });
     }
     $('f-email').addEventListener('submit', sendEmail);
+    $('f-pass').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = $('in-user').value.trim().toLowerCase(), pw = $('in-pw').value;
+      if (!email || !pw) return showErr('login-err', 'メールアドレスとパスワードを入れてください');
+      var btn = e.submitter || $('f-pass').querySelector('button[type=submit]');
+      busy(true, btn); showErr('login-err', '');
+      S.email = email;
+      call('login', { email: email, password: pw, remember: $('in-remember').checked, deviceName: A.deviceName() }).then(function (res) {
+        busy(false, btn);
+        if (!res.ok) return showErr('login-err', res.message);
+        $('in-pw').value = '';
+        S.me = res.me; S.hasPassword = true;
+        loadState();
+      });
+    });
+    $('to-code').addEventListener('click', function () { $('f-pass').hidden = true; $('f-email').hidden = false; $('in-email').value = $('in-user').value; showErr('login-err', ''); $('in-email').focus(); });
+    $('to-pass').addEventListener('click', function () { $('f-email').hidden = true; $('f-pass').hidden = false; showErr('login-err', ''); });
     $('f-code').addEventListener('submit', function (e) {
       e.preventDefault();
       var code = $('in-code').value.replace(/\D/g, '');
       if (code.length !== 6) return showErr('login-err', '6桁の数字を入れてください');
       var btn = e.submitter || $('f-code').querySelector('button[type=submit]');
       busy(true, btn); showErr('login-err', '');
-      call('verify', { email: S.email, code: code }).then(function (res) {
+      call('verify', { email: S.email, code: code, remember: $('in-remember').checked, deviceName: A.deviceName() }).then(function (res) {
         busy(false, btn);
         if (!res.ok) return showErr('login-err', res.message);
-        S.me = res.me;
+        S.me = res.me; S.hasPassword = res.hasPassword;
         loadState();
       });
     });
@@ -78,7 +95,7 @@
   }
   function toLogin() {
     S.me = null;
-    $('f-code').hidden = true; $('f-email').hidden = false; $('in-code').value = '';
+    $('f-code').hidden = true; $('f-email').hidden = true; $('f-pass').hidden = false; $('in-code').value = '';
     view('v-login');
   }
   function logout() { A.logout(); toLogin(); }
@@ -87,7 +104,7 @@
   function loadState(then) {
     call('state').then(function (res) {
       if (!res.ok) { if (!res.relogin) alertBox(res.message); return; }
-      S.me = res.me; S.data = res.data; S.sha = res.sha; S.recent = res.recent || [];
+      S.me = res.me; S.data = res.data; S.sha = res.sha; S.recent = res.recent || []; S.hasPassword = res.hasPassword;
       if (then) then();
       else if (/[?&]next=edit\b/.test(location.search)) location.replace('edit.html');
       else renderHome();
@@ -95,6 +112,9 @@
   }
   function renderHome() {
     $('me-name').textContent = S.me.name;
+    var skip = false; try { skip = localStorage.getItem('abeno-setpw-skip') === '1'; } catch (e) { skip = false; }
+    $('f-setpw').hidden = S.hasPassword !== false || skip;
+    $('pw-user').value = S.email || '';
     $('areas').innerHTML = S.me.areas.map(function (a) {
       // 写真は会話では変えられないので、編集モードへ案内する
       if ((window.StaffCore.areaById(a.id) || {}).photoOnly) return '<a class="st-area" href="edit.html"><b>' + esc(a.label) + '</b><small>HP編集モードで、写真をタップして差し替えます</small><span aria-hidden="true">›</span></a>';
@@ -222,6 +242,31 @@
   });
 
   $('st-mode').textContent = DEMO ? 'スタッフ用・確認モード（HPもメールも変わりません）' : 'スタッフ用';
+  // パスワードを決める
+  $('f-setpw').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var pw = $('in-newpw').value;
+    if (pw.length < 8) return showErr('setpw-err', 'パスワードは8文字以上にしてください');
+    var btn = e.submitter || $('f-setpw').querySelector('button[type=submit]');
+    busy(true, btn); showErr('setpw-err', '');
+    call('setPassword', { password: pw }).then(function (res) {
+      busy(false, btn);
+      if (!res.ok) return showErr('setpw-err', res.message);
+      $('in-newpw').value = ''; S.hasPassword = true; $('f-setpw').hidden = true;
+      alertBox(res.message);
+    });
+  });
+  $('setpw-skip').addEventListener('click', function () { try { localStorage.setItem('abeno-setpw-skip', '1'); } catch (e) { /* なし */ } $('f-setpw').hidden = true; });
+  $('open-setpw').addEventListener('click', function () { $('f-setpw').hidden = false; $('in-newpw').focus(); });
+
   initLogin();
-  if (A.loggedIn()) loadState(); else view('v-login');
+  if (A.loggedIn()) loadState();
+  else {
+    view('v-login');
+    // 覚えた端末なら、開くだけで入れる
+    A.autoLogin().then(function (res) {
+      if (res && res.ok) { S.me = res.me; S.hasPassword = res.hasPassword; loadState(); }
+      else if (res && res.message) showErr('login-err', res.message);
+    });
+  }
 })();

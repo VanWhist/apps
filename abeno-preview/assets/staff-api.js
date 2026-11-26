@@ -14,6 +14,17 @@ var StaffAPI = (function () {
   var DEMO = !API;
   var Core = window.StaffCore;
   var TOKEN_KEY = 'abeno-staff-token', DEMO_KEY = 'abeno-staff-demo';
+  // 「この端末を覚える」の鍵。タブを閉じても残るよう localStorage に置く（ログアウトで消す）
+  var DEVICE_KEY = 'abeno-staff-device';
+  function ls(k, v) {
+    try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); }
+    catch (e) { /* 保存できなくても使える（毎回ログイン） */ }
+    return null;
+  }
+  function deviceName() {
+    var u = navigator.userAgent || '';
+    return /iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) ? 'iPad' : /Android/.test(u) ? 'Android' : /Mac/.test(u) ? 'Mac' : /Windows/.test(u) ? 'Windows' : 'その他';
+  }
 
   function ss(k, v) {
     try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); }
@@ -36,12 +47,22 @@ var StaffAPI = (function () {
     return saved || { data: fresh, sha: 1, undo: {}, recent: [], email: '', files: {} };
   })();
   demo.files = demo.files || {};
+  demo.pw = demo.pw || {};          // 見本のパスワード（確認モードだけ。本物は GAS がハッシュで持つ）
+  demo.devices = demo.devices || {};
+  var DEMO_PW = 'abeno-demo';
   function saveDemo() { ss(DEMO_KEY, JSON.stringify(demo)); }
   function demoStaff(email) { for (var i = 0; i < DEMO_STAFF.length; i++) if (DEMO_STAFF[i].email === email) return DEMO_STAFF[i]; return null; }
   function demoPublic(s) { return { name: s.name, admin: !!s.admin, areas: s.areas.map(function (id) { var a = Core.areaById(id); return { id: a.id, label: a.label, hint: a.hint }; }) }; }
   function nowStr() { return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 16).replace('T', ' '); }
   function sumRows(rows) { return rows.map(function (x) { return x.where + '：' + (x.summary || x.after); }).join(' ／ '); }
 
+  function demoSession(s, p) {
+    demo.email = s.email;
+    var out = { ok: true, token: 'demo', me: demoPublic(s), hasPassword: !!demo.pw[s.email] };
+    if (p.remember === true) { var k = 'demo-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2) + '-'.repeat(30); demo.devices[k] = s.email; out.device = k; }
+    saveDemo();
+    return out;
+  }
   function demoHandle(action, p) {
     var me = demoStaff(demo.email);
     if (action === 'requestCode') return { ok: true, message: '登録されているメールなら、6桁のコードを送りました（10分有効）。', demoCode: '123456' };
@@ -49,14 +70,30 @@ var StaffAPI = (function () {
       var s = demoStaff(String(p.email).toLowerCase());
       if (!s) return { ok: false, message: '確認モードでは、上の見本のスタッフを選んでください。' };
       if (p.code !== '123456') return { ok: false, message: 'コードが違います（確認モードのコードは 123456）' };
-      demo.email = s.email; saveDemo();
-      return { ok: true, token: 'demo', me: demoPublic(s) };
+      return demoSession(s, p);
     }
+    if (action === 'login') {
+      var u = demoStaff(String(p.email || '').trim().toLowerCase());
+      if (!u || p.password !== (demo.pw[u.email] || DEMO_PW)) return { ok: false, message: 'メールアドレスかパスワードが違います（確認モードのパスワードは ' + DEMO_PW + '）' };
+      if (!demo.pw[u.email]) { demo.pw[u.email] = DEMO_PW; saveDemo(); }
+      return demoSession(u, p);
+    }
+    if (action === 'device') {
+      var de = demo.devices[p.device], ds = de && demoStaff(de);
+      if (!ds) return { ok: false, relogin: true, message: 'この端末の記憶が切れました。もう一度ログインしてください。' };
+      return demoSession(ds, {});
+    }
+    if (action === 'logout') { if (p.device) delete demo.devices[p.device]; demo.email = ''; saveDemo(); return { ok: true }; }
     if (!me) return { ok: false, relogin: true, message: 'ログインしてください。' };
+    if (action === 'setPassword') {
+      if (String(p.password || '').length < 8) return { ok: false, message: 'パスワードは8文字以上にしてください' };
+      demo.pw[me.email] = p.password; saveDemo();
+      return { ok: true, message: 'パスワードを決めました（確認モード：このタブの中だけ）。' };
+    }
     if (action === 'state') {
       var out = {};
       me.areas.forEach(function (id) { out[id] = Core.areaData(demo.data, id); });
-      return { ok: true, me: demoPublic(me), data: out, sha: String(demo.sha), recent: demo.recent.map(function (r) { r.mine = r.email === me.email; return r; }) };
+      return { ok: true, me: demoPublic(me), hasPassword: !!demo.pw[me.email], data: out, sha: String(demo.sha), recent: demo.recent.map(function (r) { r.mine = r.email === me.email; return r; }) };
     }
     if (action === 'chat') {
       var r = Mock.respond(p.area, p.message, demo.data);
@@ -102,14 +139,13 @@ var StaffAPI = (function () {
       if (!String(p.text || '').trim()) return { ok: false, message: '要望を書いてください' };
       return { ok: true, message: '要望を送りました（確認モードのため、どこにも届いていません）。' };
     }
-    if (action === 'logout') { demo.email = ''; saveDemo(); }
     return { ok: true };
   }
 
   // ---------- 通信 ----------
   function call(action, p) {
     p = p || {};
-    if (DEMO) return new Promise(function (resolve) { setTimeout(function () { resolve(demoHandle(action, p)); }, action === 'chat' ? 700 : 250); });
+    if (DEMO) return new Promise(function (resolve) { setTimeout(function () { resolve(demoHandle(action, p)); }, action === 'chat' ? 700 : 250); }).then(keep);
     p.action = action;
     var t = ss(TOKEN_KEY);
     if (t) p.token = t;
@@ -117,14 +153,21 @@ var StaffAPI = (function () {
     return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(p) })
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .catch(function () { return { ok: false, message: 'つながりませんでした。電波のよい所で、もう一度お試しください。' }; })
-      .then(function (res) {
-        if (action === 'verify' && res.ok) ss(TOKEN_KEY, res.token);
-        if (res && res.relogin) ss(TOKEN_KEY, null);
-        return res;
-      });
+      .then(keep);
+    function keep(res) {
+      if (/^(verify|login|device)$/.test(action) && res.ok) { ss(TOKEN_KEY, res.token); if (res.device) ls(DEVICE_KEY, res.device); }
+      if (res && res.relogin) { ss(TOKEN_KEY, null); if (action === 'device') ls(DEVICE_KEY, null); }
+      return res;
+    }
   }
   function loggedIn() { return DEMO ? !!demoStaff(demo.email) : !!ss(TOKEN_KEY); }
-  function logout() { var r = call('logout'); ss(TOKEN_KEY, null); return r; }
+  // ログアウトすると、この端末の記憶も消す（開いただけで入れる状態を残さない）
+  function logout() { var r = call('logout', { device: ls(DEVICE_KEY) || '' }); ss(TOKEN_KEY, null); ls(DEVICE_KEY, null); return r; }
+  // 覚えた端末なら、通行証を取り直す。そうでなければ null
+  function autoLogin() {
+    if (loggedIn() || !ls(DEVICE_KEY)) return Promise.resolve(null);
+    return call('device', { device: ls(DEVICE_KEY) });
+  }
   // 確認モードで、反映済みの見本データ全体（編集モードの表示用）
   function demoFile(src) { return DEMO ? demo.files[src] || '' : ''; }
   function demoSiteData() { return DEMO ? JSON.parse(JSON.stringify(demo.data)) : null; }
@@ -216,5 +259,5 @@ var StaffAPI = (function () {
     };
   })();
 
-  return { DEMO: DEMO, siteUrl: C.siteUrl || 'index.html', DEMO_STAFF: DEMO_STAFF, call: call, loggedIn: loggedIn, logout: logout, demoSiteData: demoSiteData, demoFile: demoFile, Mock: Mock };
+  return { DEMO: DEMO, siteUrl: C.siteUrl || 'index.html', DEMO_STAFF: DEMO_STAFF, call: call, loggedIn: loggedIn, logout: logout, demoSiteData: demoSiteData, demoFile: demoFile, Mock: Mock, autoLogin: autoLogin, deviceName: deviceName, DEMO_PW: DEMO_PW };
 })();

@@ -9,7 +9,7 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='11' r='6' fill='%23ff6b57'/%3E%3Cpath d='M4 30 Q20 40 36 30' stroke='%231d1f3f' stroke-width='3.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="assets/style.css">
-<link rel="stylesheet" href="assets/staff.css?v=20261125d">
+<link rel="stylesheet" href="assets/staff.css?v=20261126b">
 </head>
 <body class="st-body">
 <noscript><p class="noscript">このページは JavaScript を使っています。</p></noscript>
@@ -32,11 +32,23 @@
       <p><b>確認モード</b>です。見本のスタッフを選ぶと、担当ごとの見え方を試せます。</p>
       <div class="st-demo-list" id="demo-staff"></div>
     </div>
-    <form id="f-email" class="st-panel" novalidate>
+    <!-- メール＋パスワード（iPhone はパスワードを保存すると、次から顔認証で自動入力できる） -->
+    <form id="f-pass" class="st-panel" novalidate>
+      <label class="st-label" for="in-user">メールアドレス</label>
+      <input id="in-user" name="username" type="email" inputmode="email" autocomplete="username" required placeholder="example@gmail.com">
+      <label class="st-label" for="in-pw">パスワード</label>
+      <input id="in-pw" name="password" type="password" autocomplete="current-password" required>
+      <button class="btn btn-main st-wide" type="submit">ログイン</button>
+      <p class="st-note">iPhoneでは、パスワードを保存すると、次から入力欄をタップして顔認証するだけで入れます。</p>
+      <button class="st-link" type="button" id="to-code">パスワードがない・忘れた（メールでコードを受け取る）</button>
+    </form>
+    <!-- メールのコード（初めての方・パスワードを忘れた方） -->
+    <form id="f-email" class="st-panel" novalidate hidden>
       <label class="st-label" for="in-email">登録したメールアドレス</label>
       <input id="in-email" type="email" inputmode="email" autocomplete="email" required placeholder="example@gmail.com">
-      <p class="st-note">6桁のログインコードをメールで送ります。パスワードはいりません。</p>
+      <p class="st-note">6桁のログインコードをメールで送ります。</p>
       <button class="btn btn-main st-wide" type="submit">コードを送る</button>
+      <button class="st-link" type="button" id="to-pass">パスワードで入る</button>
     </form>
     <form id="f-code" class="st-panel" novalidate hidden>
       <p class="st-note" id="code-sent"></p>
@@ -45,6 +57,7 @@
       <button class="btn btn-main st-wide" type="submit">ログイン</button>
       <button class="st-link" type="button" id="code-back">メールアドレスを入れ直す</button>
     </form>
+    <label class="st-remember"><input type="checkbox" id="in-remember" checked> この端末を覚える（90日。次から開くだけで入れます。共用のパソコンでは外してください）</label>
     <p class="st-err" id="login-err" role="alert"></p>
   </section>
 
@@ -53,9 +66,21 @@
     <h1 class="st-h1"><span id="me-name"></span> さん</h1>
     <p class="st-lead">どこを更新しますか？</p>
     <div class="st-areas" id="areas"></div>
+    <!-- 初めてコードで入った方へ：パスワードを決めると、次からはパスワード（iPhoneは顔認証）で入れる -->
+    <form id="f-setpw" class="st-panel st-setpw" novalidate hidden>
+      <p class="st-label">次から、パスワードで入れるようにしませんか？</p>
+      <p class="st-note">iPhoneでは「パスワードを保存」を選ぶと、次から顔認証だけで入れます。</p>
+      <input id="pw-user" type="email" autocomplete="username" class="sr" tabindex="-1" aria-hidden="true">
+      <label class="st-label" for="in-newpw">新しいパスワード（8文字以上）</label>
+      <input id="in-newpw" type="password" autocomplete="new-password" minlength="8" required>
+      <button class="btn btn-main st-wide" type="submit">パスワードを決める</button>
+      <button class="st-link" type="button" id="setpw-skip">あとで</button>
+      <p class="st-err" id="setpw-err" role="alert"></p>
+    </form>
     <a class="st-editlink" href="edit.html"><b>HPの見た目のまま直す（編集モード）</b><small>HPを開いて、直したい文字をクリック。パソコン向け</small></a>
     <h2 class="st-h2">最近の更新</h2>
     <ul class="st-recent" id="recent"></ul>
+    <button class="st-link" type="button" id="open-setpw">パスワードを決める・変える</button>
   </section>
 
   <!-- 3. 会話で更新 -->
@@ -76,10 +101,10 @@
   </section>
 </main>
 
-<script src="data/staff-config.js?v=20261125d"></script>
-<script src="data/site-data.js?v=20261125d"></script>
-<script src="assets/staff-core.js?v=20261125d"></script>
-<script src="assets/staff-api.js?v=20261125d"></script>
-<script src="assets/staff.js?v=20261125d"></script>
+<script src="data/staff-config.js?v=20261126b"></script>
+<script src="data/site-data.js?v=20261126b"></script>
+<script src="assets/staff-core.js?v=20261126b"></script>
+<script src="assets/staff-api.js?v=20261126b"></script>
+<script src="assets/staff.js?v=20261126b"></script>
 </body>
 </html>
